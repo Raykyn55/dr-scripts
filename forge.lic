@@ -184,6 +184,7 @@ class Forge
   end
 
   def swap_tool(next_tool, skip = false)
+    next_tool = @settings.forging_tools.find { |tool| tool =~ /#{next_tool}/i } || next_tool
     echo("What is the next tool?                       :: #{ next_tool }") if @debug
     echo("Are we holding the next tool?                :: #{ DRCI.in_hands?(next_tool) }") if @debug
     echo("Is the next tool tongs?                      :: #{ next_tool.include?('tongs') }") if @debug
