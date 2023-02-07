@@ -373,13 +373,13 @@ class WorkOrders
         DRC.message("Stopping #{book.capitalize} training after #{@counter/60} minutes because #{book.capitalize} is above training threshold of 28")
 
         parts.each do |part| # dumping all excess parts, this covers all of enchanting/remedies
-            until /What were you referring to/ =~ DRC.bput("get my #{part} from my #{@bag}", /^You get/, /^You are already/, /^You're already/, /What were you referring to/)
+            while DRCI.get_item?(part, @bag)
                 DRCI.dispose_trash(part, @settings.worn_trashcan, @settings.worn_trashcan_verb)
             end
         end
         # don't trash stock materials if doing remedies|artificing(no stock materials to trash), if we're using custom materials(we'll be deeding remainder), or if we've specifically elected to retain them.
         return true if book =~ /enchanting|alchemy/i || @workorders_materials['custom'][base] == type || @retain_crafting_materials
-        until /What were you referring to/ =~ DRC.bput("get my #{type} #{base}", /^You get/, /^You are already/, /^You're already/, /What were you referring to/) # dumping excess stock
+        while DRCI.get_item?("#{type} #{base}", @bag)
             DRCI.dispose_trash("#{type} #{base}", @settings.worn_trashcan, @settings.worn_trashcan_verb)
         end
         true
@@ -429,7 +429,7 @@ class WorkOrders
 
     def finished_remedies(name, quantity)
         type,base = name.split(' ')
-        until /referring/ =~ DRC.bput("get #{type} #{base} from my #{@bag}", /^You get/, /^You are already/, /^You're already/, /What were you referring to/)
+        while DRCI.get_item?("#{type} #{base}", @bag)
             fput("combine")
         end
         return material_volume(type, base)
@@ -443,17 +443,15 @@ class WorkOrders
         elsif on_hand_stock = check_own_materials(recipe, quantity, materials_info['stock-name'], base) # If we have enough materials, returns a value for on_hand_stock. otherwise returns false.
             scrap = total_needed == on_hand_stock ? false : true
             return [false,scrap] # have what we need, no need to buy
-        elsif DRCI.exists?("#{materials_info['stock-name']} #{base}", @bag)
-            DRC.bput("get my #{materials_info['stock-name']} #{base}", /^You get/, /^You are already/, /^You're already/, /^What were you referring to/)
+        elsif DRCI.get_item?("#{materials_info['stock-name']} #{base}", @bag)
             /(\d+)/ =~ DRC.bput("count my #{materials_info['stock-name']} #{base}", /^You count out (\d+) (pieces|yards) of (lumber|material)/)
             on_hand_stock = Regexp.last_match(1).to_i
             if on_hand_stock >= (total_needed) # We have what we need, so no need to buy more.
-                DRC.bput("put my #{materials_info['stock-name']} #{base} in my #{@bag}", /^You put/)
+                DRCC.stow_crafting_item("#{materials_info['stock-name']} #{base}", @bag, @belt)
                 scrap = (total_needed)%materials_info['stock-volume'] > 0 ? true : false
                 return [base,scrap]
             end
             total_needed -= on_hand_stock # How many do we need to buy to add to what we already have.
-            # DRC.bput("get my #{materials_info['stock-name']} #{base} from my #{@bag}", /^You get/, /^You are already/, /^You're already/, /What were you referring to/) # have in hand to combine
         end
         
         base_to_buy = (total_needed/materials_info['stock-volume'].to_f).ceil
@@ -512,11 +510,11 @@ class WorkOrders
                 redo
             end
             until /(There doesn't seem to be anything left in the pile|You pick up)/ =~ DRC.bput("get #{herb}", /^You get.*a pile on the ground/, /^You pick up/, /^There doesn't seem to be anything left in the pile/) 
-                DRC.bput("put my #{herb} in my #{@bag}", /^You put your/)
+                DRCC.stow_crafting_item(herb, @bag, @belt)
                 flowers += 1
             end
             if checkright
-                DRC.bput("put my #{herb} in my #{@bag}", /^You put your/)
+                DRCC.stow_crafting_item(herb, @bag, @belt)
                 flowers += 1
             end
         end
@@ -524,7 +522,7 @@ class WorkOrders
         process = recipe['container'] == 'bowl' ? "put my #{herb} in grinder" : "put my #{herb} in press"
         quantity.times do
             5.times do
-                DRC.bput("get #{herb} from my #{@bag}", /^You get/, /^You are already/, /^You're already/, /What were you referring to/)
+                DRCI.get_item?(herb, @bag)
                 DRC.bput(process, /^You place some/)
                 DRC.bput("combine", /^You must be holding/, /^You combine/)
                 flowers -= 1
@@ -538,7 +536,7 @@ class WorkOrders
     end
 
     def redeem_deed(deed_type, base = '')
-        unless /referring/ =~ DRC.bput("get #{@ordinals.first} #{deed_type} deed from my #{@workorders_deed_storage}", /^You get/, /^You are already/, /^You're already/, /^What were you referring to/)
+        if DRCI.get_item?("#{@ordinals.first} #{deed_type}", @workorders_deed_storage)
             case DRC.bput("tap my deed", /^An attendant arrives/, /^The worker explains/, /^The deed appears to be redeemable only in one of the Crafting Society Halls/)
             when /explains/
                 DRCC.stow_crafting_item('deed', @workorders_deed_storage, nil)
@@ -550,7 +548,7 @@ class WorkOrders
                 return redeem_deed(deed_type, base)
             end
             pause 0.5
-            DRC.bput("get my #{deed_type} #{base}", /^You pick up/, /^You are already/, /^You're already/)
+            DRCI.lift_specific?("#{deed_type} #{base}")
             true
         else
             DRC.message("Missing the required deeds for #{deed_type}")
@@ -563,8 +561,8 @@ class WorkOrders
             DRCM.ensure_copper_on_hand(@cash_on_hand || 10_000, @settings)
             DRCT.order_item(@deeds_room, @deeds_number)
         end
-        DRC.bput("get my packet", /^You get/, /^You are already/, /^You're already/, /What were you referring to/)
-        DRC.bput("get my #{item}", /^You get/, /^You are already/, /^You're already/, /What were you referring to/)
+        DRCI.get_item?("deed packet")
+        DRCI.get_item_if_not_held?(item, @bag)
         DRC.bput("push my #{item} with packet", /^You push/)
         DRCC.stow_crafting_item("packet", @bag, nil)
         DRCC.stow_crafting_item("deed", @workorders_deed_storage, nil)
@@ -585,7 +583,7 @@ class WorkOrders
     def check_own_materials(item, quantity, type, base)
         volume = 0
         while volume < (item['volume'] * quantity)
-            unless /referring/ =~ DRC.bput("get #{type} #{base} from my #{@bag}", /^You get/, /^You are already/, /^You're already/, /^What were you referring to/)
+            if DRCI.get_item?("#{type} #{base}", @bag)
                 fput('combine')
                 volume = material_volume(type, base)
                 next
@@ -607,7 +605,7 @@ class WorkOrders
     end
 
     def check_own_ingot(item, quantity, type)
-        if /referring/ =~ DRC.bput("get my #{type} ingot", /^You get/, /^You are already/, /^You're already/, /^What were you referring to/) 
+        if DRCI.get_item?("#{type} ingot", @bag)
             if volume = deed_volume(type)                
                 redeem_deed(type, 'ingot')
             else
@@ -645,8 +643,8 @@ class WorkOrders
     def smelt(type)
         DRCC.find_empty_crucible(@hometown)
         2.times do
-            DRC.bput("get my #{type} ingot", /^You get/, /^You are already/, /^You're already/, /What were you referring to/)
-            fput('put my ingot in cruc')
+            return unless DRCI.get_item?("#{type} ingot", @bag)
+            DRCI.put_away_item_unsafe("#{type} ingot", "crucible")
         end
         DRC.wait_for_script_to_complete('smelt')
         DRCI.stow_hands
@@ -660,7 +658,7 @@ class WorkOrders
         DRCI.stow_hands
         500.times do
             find_npc(npc_rooms, npc_last_name)
-            DRC.bput("get my #{logbook} logbook", 'You get') unless DRC.left_hand || DRC.right_hand
+            DRCC.get_crafting_item("#{logbook} logbook", @bag, @bag_items, @belt)
             case DRC.bput("ask #{npc} for #{diff} #{discipline} work", '^To whom', 'order for .* I need \d+ ', 'order for .* I need \d+ stacks \(5 uses each\) of .* quality', 'You realize you have items bundled with the logbook', 'You want to ask about shadowlings')
             when 'You want to ask about shadowlings'
                 pause 10
@@ -669,27 +667,23 @@ class WorkOrders
                 item = Regexp.last_match(1)
                 quantity = Regexp.last_match(2).to_i
                 if @min_items <= quantity && quantity <= @max_items && match_names.include?(item)
-                    DRCC.stow_crafting_item('logbook', @bag, nil)
+                    DRCC.stow_crafting_item("#{logbook} logbook", @bag, @belt)
                     return [item, quantity]
                 end
             when /order for (.*)\. I need (\d+) stacks \(5 uses each\) of .* quality/
                 item = Regexp.last_match(1)
                 quantity = Regexp.last_match(2).to_i
                 if @min_items <= quantity && quantity <= @max_items && match_names.include?(item)
-                    DRCC.stow_crafting_item('logbook')
+                    DRCC.stow_crafting_item("#{logbook} logbook", @bag, @belt)
                     return [item, quantity]
                 end
             when 'You realize you have items bundled with the logbook'
                 DRC.bput('untie my logbook', 'You untie')
-                if DRC.left_hand.include?('logbook')
-                    fput("drop my #{DRC.right_hand}")
-                else
-                    fput("drop my #{DRC.left_hand}")
-                end
-                fput('get logbook') unless [DRC.left_hand, DRC.right_hand].grep(/logbook/i).any?
+                trash = [DRC.left_hand,DRC.right_hand].find { |thing| thing !~ /logbook/i }
+                DRCI.dispose_trash(thing, @settings.worn_trashcan, @settings.worn_trashcan_verb)
             end
         end
-        DRCC.stow_crafting_item('logbook', @bag, nil)
+        DRCC.stow_crafting_item('logbook', @bag, @belt)
         DRC.message("Failed to find a qualifying order based on your current settings.")
         exit
     end    
@@ -702,16 +696,16 @@ class WorkOrders
                 return
             end
             DRC.bput("break my #{name}", /^You carefully break off/, /^You can't break that/) # and won't break. Bundles fine.
-            DRCC.stow_crafting_item(name, @bag, nil)
+            DRCC.stow_crafting_item(name, @bag, @belt)
         end
         mod = ''
         if checkleft
             mod = 'second '
-            DRCC.stow_crafting_item(name, @bag, nil)
+            DRCC.stow_crafting_item(name, @bag, @belt)
         end
-        DRC.bput("get my alchemy logbook", 'You get')
+        DRCC.get_crafting_item("alchemy logbook", @bag, @bag_items, @belt)
         quantity.times do
-            DRC.bput("get #{mod}#{name} from my #{@bag}", /^You get/, /^You are already/, /^You're already/, /What were you referring to/)
+            DRCC.get_crafting_item("#{mod}#{name}", @bag, @bag_items, @belt)
             unless /You notate the/ =~ DRC.bput("bundle my #{name} with my logbook", /^You notate the/, /^The workorder requires/)
                 DRCI.dispose_trash(name, @settings.worn_trashcan, @settings.worn_trashcan_verb)
             end
@@ -723,7 +717,7 @@ class WorkOrders
         DRCI.stow_hands
         loop do
             find_npc(info['npc-rooms'], info['npc_last_name'])
-            DRC.bput("get my #{info['logbook']} logbook", 'You get')
+            DRCC.get_crafting_item("#{info['logbook']} logbook", @bag, @bag_items, @belt)
             DRC.release_invisibility
             case DRC.bput("give my #{info['logbook']} logbook to #{info['npc']}", /You hand/, /You can/, /What were you/, /Apparently the work order time limit has expired/, /The work order isn\'t yet complete/, /What is it you\'re trying to give/)
             when /You can/, /What were you/, /What is it/
@@ -731,7 +725,7 @@ class WorkOrders
             end
             break
         end
-        DRCC.stow_crafting_item('logbook', @bag, nil)
+        DRCC.stow_crafting_item("#{info['logbook']} logbook", @bag, @belt)
     end
 
     def find_npc(room_list, npc)
