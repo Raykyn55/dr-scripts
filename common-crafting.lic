@@ -175,18 +175,14 @@ module DRCC
     Regexp.last_match(1)
   end
 
-  def get_crafting_item(*args)
-    get_crafting_item?(*args); nil
-  end
-
-  def get_crafting_item?(name, bag, bag_items, belt, skip_exit = false)
+  def get_crafting_item(name, bag, bag_items, belt, skip_exit = false)
     return true if DRCI.in_hands?(name)
     waitrt?
     if belt && belt['items'].find { |item| /\b#{name}/i =~ item || /\b#{item}/i =~ name } && ( DRCI.untie_item?(name, belt['name']) || DRCI.untie_item?(name) )
       true
     elsif bag && bag_items && bag_items.include?(name) || bag =~ /\bportal\b/i
       DRCI.get_item?(name, bag)
-    elsif DRCI.get_item?(name) ||DRCI.untie_item?(name)
+    elsif DRCI.get_item?(name) || DRCI.untie_item?(name)
       true
     else
       pause 2
@@ -196,12 +192,8 @@ module DRCC
       false
     end
   end
-  
-  def stow_crafting_item(*args)
-    stow_crafting_item?(*args); nil
-  end
 
-  def stow_crafting_item?(name, bag, belt)
+  def stow_crafting_item(name, bag, belt)
     return false unless name
     return true unless DRCI.in_hands?(name)
     waitrt?
@@ -372,11 +364,11 @@ module DRCC
     repair_info = get_data('crafting')['shaping'][town]
     DRCT.walk_to(repair_info['repair-room'])
     tools.each do |tool_name|
-      next unless get_crafting_item?(tool_name, bag, nil, belt, true)
+      next unless get_crafting_item(tool_name, bag, nil, belt, true)
       if DRCI.give_item?(repair_info['repair-npc'], tool_name)
         DRCI.stow_item?("#{repair_info['repair-npc']} ticket")
       else
-        stow_crafting_item?(tool_name, bag, belt)
+        stow_crafting_item(tool_name, bag, belt)
       end
     end
     pickup_tools(bag, belt, town, settings) if pickup
@@ -391,7 +383,7 @@ module DRCC
       pause 0.01 until tool = [DRC.right_hand,DRC.left_hand].compact.first # waits for tool to hit your hand
       belts = [settings.forging_belt, settings.engineering_belt, settings.outfitting_belt, settings.alchemy_belt, settings.enchanting_belt]
       toolbelt = belts.select { |belt| belt["items"].find { |name| name =~ /#{tool}/i } }.first # searches your toolbelts for the first one containing the tool.
-      break unless stow_crafting_item?(tool, bag, toolbelt) # hopefully stows the tool appropriately.      
+      break unless stow_crafting_item(tool, bag, toolbelt) # hopefully stows the tool appropriately.      
     end
   end
 
