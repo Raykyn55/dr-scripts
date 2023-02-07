@@ -80,7 +80,8 @@ class Athletics
     start = Time.now
     DRCT.walk_to(@outdoorsmanship_rooms.sample) unless @outdoorsmanship_rooms.empty?
     stow_athletics_items
-    DRC.wait_for_script_to_complete('outdoorsmanship', [n, "room=#{Room.current.id}", 'collect', 'rock']) unless @skip
+    args = @settings.worn_trashcan ? [n, "room=#{Room.current.id}", @settings.outdoors_method, @settings.forage_item] : [n, "room=#{Room.current.id}", 'collect', 'rock']
+    DRC.wait_for_script_to_complete('outdoorsmanship', args) unless @skip
     remaining_pause = ((n*15) - (Time.now - start))
     pause remaining_pause if remaining_pause > 0
     get_athletics_items
