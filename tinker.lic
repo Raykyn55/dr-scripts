@@ -95,6 +95,7 @@ class Tinker
   end
 
   def swap_tool(next_tool, skip = false)
+    next_tool = @settings.tinkering_tools.find { |tool| tool =~ /#{next_tool}/i } || next_tool
     return if DRCI.in_hands?(next_tool)
     if next_tool.include?('shovel') && @adjustable_tongs
       DRCC.get_adjust_tongs?('shovel', @bag, @bag_items, @belt, @adjustable_tongs)
