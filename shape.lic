@@ -223,6 +223,7 @@ class Shape
   end
 
   def swap_tool(next_tool, skip = false)
+    next_tool = @settings.shaping_tools.find { |tool| tool =~ /#{next_tool}/i } || next_tool
     unless next_tool == DRC.right_hand_noun
       DRCC.stow_crafting_item(DRC.right_hand, @bag, @belt)
       DRCC.get_crafting_item(next_tool, @bag, @bag_items, @belt, skip)
