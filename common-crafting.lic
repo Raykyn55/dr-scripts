@@ -396,7 +396,7 @@ module DRCC
   end
 
   def logbook_item(logbook, noun, container)
-    DRC.bput("get my #{logbook} logbook", 'You get')
+    DRC.bput("get my #{logbook} logbook", 'You get', 'You are already holding that')
     case DRC.bput("bundle my #{noun} with my logbook", 'You notate the', 'This work order has expired', 'The work order requires items of a higher quality', 'That isn\'t the correct type of item for this work order.', 'You notice the workorder calls for')
     when 'This work order has expired', 'The work order requires items of a higher quality', 'That isn\'t the correct type of item for this work order.', 'You notice the workorder calls for'
       DRCI.dispose_trash(noun)
