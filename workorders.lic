@@ -536,7 +536,7 @@ class WorkOrders
     end
 
     def redeem_deed(deed_type, base = '')
-        if DRCI.get_item?("#{@ordinals.first} #{deed_type}", @workorders_deed_storage)
+        if DRCI.get_item?("#{@ordinals.first} #{deed_type} deed", @workorders_deed_storage)
             case DRC.bput("tap my deed", /^An attendant arrives/, /^The worker explains/, /^The deed appears to be redeemable only in one of the Crafting Society Halls/)
             when /explains/
                 DRCC.stow_crafting_item('deed', @workorders_deed_storage, nil)
