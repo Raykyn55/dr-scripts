@@ -42,11 +42,11 @@ class CleanLumber
     unless (args.table_saw && DRC.left_hand) || DRCI.lift?
       exit
     end
-    DRC.bput("get my packet", /^You get/)
-    DRC.bput("push my lumber with packet", /^You push the lumber to the side/)
-    DRC.bput("Stow my packet", /^You put your packet/, /^Stow what/)
-    DRC.bput("Put my deed in #{args.storage}", /^You put your deed/)
-    DRCC.repair_own_tools(get_data('crafting')['blacksmithing'][@hometown], ['saw', @drawknife], @bag, @bag_items, @belt) unless args.table_saw || !@self_repair
+    DRCI.get_item?("deed packet")
+    DRC.bput("push my #{args.type} lumber with packet", /^You push the lumber to the side/)
+    DRCI.stow_item?("deed packet")
+    DRCI.put_away_item?("#{args.type} lumber", args.storage)
+    DRCC.repair_own_tools(get_data('crafting')['blacksmithing'][@hometown], [@saw, @drawknife], @bag, @bag_items, @belt) unless args.table_saw || !@self_repair
   end
 
   def process_size(args, size)
@@ -72,15 +72,15 @@ class CleanLumber
       DRC.bput("cut #{size} with table saw", /Roundtime/)
     else
       size = DRC.left_hand.split.last
-      until DRC.bput("cut #{size} with my saw", 'roundtime', 'you complete', 'ready to be carved') =~ /you complete|ready to be carved/
+      until DRC.bput("cut #{size} with my #{saw}", 'roundtime', 'you complete', 'ready to be carved') =~ /you complete|ready to be carved/
         waitrt?
         DRCA.crafting_magic_routine(@settings)
       end
       pause
       waitrt?
-      DRCC.stow_crafting_item('saw', @bag, @belt)
+      DRCC.stow_crafting_item(@saw, @bag, @belt)
       DRCC.get_crafting_item(@drawknife, @bag, @bag_items, @belt)
-      until DRC.bput("scrape #{size} with my drawknife", 'roundtime', 'work completes') == 'work completes'
+      until DRC.bput("scrape #{size} with my #{@drawknife}", 'roundtime', 'work completes') == 'work completes'
         waitrt?
         DRCA.crafting_magic_routine(@settings)
       end
@@ -98,16 +98,16 @@ class CleanLumber
         DRC.bput('combine', /^You combine the stacks/, /^You must be holding/)
       end
     end
-    /(\d+)/ =~ DRC.bput("Count my lumber", 'You count out \d+ pieces of lumber remaining')
+    /(\d+)/ =~ DRC.bput("Count my #{args.type} lumber", 'You count out \d+ pieces of lumber remaining')
     if Regexp.last_match(1).to_i > @stack
-      DRC.bput("get my packet", /^You get/)
-      DRC.bput("push my lumber with packet", /^You push the lumber to the side/)
-      DRC.bput("Stow my packet", /^You put your packet/, /^Stow what/)
-      DRC.bput("Put my deed in #{args.storage}", /^You put your deed/)
+      DRCI.get_item?("deed packet")
+      DRC.bput("push my #{args.type} lumber with packet", /^You push the lumber to the side/)
+      DRCI.stow_item?("deed packet")
+      DRCI.put_away_item?("#{args.type} lumber", args.storage)
     end
     unless args.table_saw
       DRCI.lower_ground("#{args.type} lumber")
-      DRCC.get_crafting_item('saw', @bag, @bag_items, @belt)
+      DRCC.get_crafting_item(@saw, @bag, @bag_items, @belt)
     end
   end
 
