@@ -110,7 +110,7 @@ class CleanLumber
       DRCI.put_away_item?("#{args.type} lumber", args.storage)
     end
     unless args.table_saw
-      DRCI.lower_ground("#{args.type} lumber")
+      DRCI.lower_item?("#{args.type} lumber")
       DRCC.get_crafting_item(@saw, @bag, @bag_items, @belt)
     end
   end
