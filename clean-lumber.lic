@@ -32,7 +32,7 @@ class CleanLumber
         exit
       end
       DRCI.stow_hands
-      DRCC.repair_own_tools(get_data('crafting')['blacksmithing'][@hometown], [@saw, @drawknife], @bag, @bag_items, @belt) if @self_repair
+      DRCC.repair_own_tools(get_data('crafting')['blacksmithing'][@settings.hometown], [@saw, @drawknife], @bag, @bag_items, @belt) if @self_repair
       DRCC.get_crafting_item(@saw, @bag, @bag_items, @belt)
     end
 
@@ -50,7 +50,7 @@ class CleanLumber
     DRC.bput("push my #{args.type} lumber with packet", /^You push the lumber to the side/)
     DRCI.stow_item?("deed packet")
     DRCI.put_away_item?("#{args.type} deed", args.storage)
-    DRCC.repair_own_tools(get_data('crafting')['blacksmithing'][@hometown], [@saw, @drawknife], @bag, @bag_items, @belt) unless args.table_saw || !@self_repair
+    DRCC.repair_own_tools(get_data('crafting')['blacksmithing'][@settings.hometown], [@saw, @drawknife], @bag, @bag_items, @belt) unless args.table_saw || !@self_repair
   end
 
   def process_size(args, size)
