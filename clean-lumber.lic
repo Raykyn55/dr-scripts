@@ -43,13 +43,13 @@ class CleanLumber
       end
     end
     DRCC.stow_crafting_item(@saw, @bag, @belt) unless args.table_saw
-    unless (args.table_saw && DRC.left_hand) || DRCI.lift?
+    unless (args.table_saw && DRC.left_hand) || DRCI.lift_specific?("#{args.type} lumber")
       exit
     end
     DRCI.get_item?("deed packet")
     DRC.bput("push my #{args.type} lumber with packet", /^You push the lumber to the side/)
     DRCI.stow_item?("deed packet")
-    DRCI.put_away_item?("#{args.type} lumber", args.storage)
+    DRCI.put_away_item?("#{args.type} deed", args.storage)
     DRCC.repair_own_tools(get_data('crafting')['blacksmithing'][@hometown], [@saw, @drawknife], @bag, @bag_items, @belt) unless args.table_saw || !@self_repair
   end
 
@@ -76,7 +76,7 @@ class CleanLumber
       DRC.bput("cut #{size} with table saw", /Roundtime/)
     else
       size = DRC.left_hand.split.last
-      until DRC.bput("cut #{size} with my #{@saw}", 'roundtime', 'you complete', 'ready to be carved') =~ /you complete|ready to be carved/
+      until DRC.bput("cut #{size} with my #{@saw}", /^Roundtime/, /^Finally you complete/, 'ready to be carved') =~ /you complete|ready to be carved/
         waitrt?
         DRCA.crafting_magic_routine(@settings)
       end
@@ -84,7 +84,7 @@ class CleanLumber
       waitrt?
       DRCC.stow_crafting_item(@saw, @bag, @belt)
       DRCC.get_crafting_item(@drawknife, @bag, @bag_items, @belt)
-      until DRC.bput("scrape #{size} with my #{@drawknife}", 'roundtime', 'work completes') == 'work completes'
+      until DRC.bput("scrape #{size} with my #{@drawknife}", /^Roundtime/, /^At last your work completes/) =~ /work completes/
         waitrt?
         DRCA.crafting_magic_routine(@settings)
       end
@@ -98,7 +98,7 @@ class CleanLumber
       waitrt?
       DRC.bput('combine', /^You combine the stacks/, /^You must be holding/)
     else
-      if DRCI.lift? || DRCI.get_item?("#{args.type} lumber", args.storage)
+      if DRCI.lift_specific?("#{args.type} lumber") || DRCI.get_item?("#{args.type} lumber", args.storage)
         DRC.bput('combine', /^You combine the stacks/, /^You must be holding/)
       end
     end
@@ -107,7 +107,7 @@ class CleanLumber
       DRCI.get_item?("deed packet")
       DRC.bput("push my #{args.type} lumber with packet", /^You push the lumber to the side/)
       DRCI.stow_item?("deed packet")
-      DRCI.put_away_item?("#{args.type} lumber", args.storage)
+      DRCI.put_away_item?("#{args.type} deed", args.storage)
     end
     unless args.table_saw
       DRCI.lower_item?("#{args.type} lumber")
