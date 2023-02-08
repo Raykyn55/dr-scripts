@@ -44,8 +44,10 @@ class CleanLumber
     end
     DRCC.stow_crafting_item(@saw, @bag, @belt) unless args.table_saw
     unless (args.table_saw && DRC.left_hand) || DRCI.lift_specific?("#{args.type} lumber")
+      magic_cleanup
       exit
     end
+    magic_cleanup
     DRCI.get_item?("deed packet")
     DRC.bput("push my #{args.type} lumber with packet", /^You push the lumber to the side/)
     DRCI.stow_item?("deed packet")
