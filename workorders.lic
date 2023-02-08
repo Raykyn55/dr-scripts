@@ -605,7 +605,7 @@ class WorkOrders
     end
 
     def check_own_ingot(item, quantity, type)
-        if DRCI.get_item?("#{type} ingot", @bag)
+        unless DRCI.get_item?("#{type} ingot", @bag)
             if volume = deed_volume(type)                
                 redeem_deed(type, 'ingot')
             else
@@ -705,7 +705,7 @@ class WorkOrders
         end
         DRCC.get_crafting_item("alchemy logbook", @bag, @bag_items, @belt)
         quantity.times do
-            DRCC.get_crafting_item("#{mod}#{name}", @bag, @bag_items, @belt)
+            DRCI.get_item("#{mod}#{name}", @bag)
             unless /You notate the/ =~ DRC.bput("bundle my #{name} with my logbook", /^You notate the/, /^The workorder requires/)
                 DRCI.dispose_trash(name, @settings.worn_trashcan, @settings.worn_trashcan_verb)
             end
