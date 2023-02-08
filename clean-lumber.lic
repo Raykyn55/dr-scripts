@@ -39,7 +39,7 @@ class CleanLumber
       end
     end
     DRCC.stow_crafting_item(@saw, @bag, @belt) unless args.table_saw
-    unless (args.table_saw && DRC.left_hand) || /You get/ =~ DRC.bput("get #{args.type} lumber from my #{args.storage}", /^You get/, /^What were you referring/)
+    unless (args.table_saw && DRC.left_hand) || DRCI.lift?
       exit
     end
     DRC.bput("get my packet", /^You get/)
@@ -94,8 +94,9 @@ class CleanLumber
       waitrt?
       DRC.bput('combine', /^You combine the stacks/, /^You must be holding/)
     else
-      DRC.bput("get #{args.type} lumber from my #{args.storage}", /^What were you referring/, /^You get some/)
-      DRC.bput('combine', /^You combine the stacks/, /^You must be holding/)
+      if DRCI.lift? || DRCI.get_item?("#{args.type} lumber", args.storage)
+        DRC.bput('combine', /^You combine the stacks/, /^You must be holding/)
+      end
     end
     /(\d+)/ =~ DRC.bput("Count my lumber", 'You count out \d+ pieces of lumber remaining')
     if Regexp.last_match(1).to_i > @stack
@@ -105,7 +106,7 @@ class CleanLumber
       DRC.bput("Put my deed in #{args.storage}", /^You put your deed/)
     end
     unless args.table_saw
-      DRC.bput("Put my #{args.type} lumber in my #{args.storage}", "You put your lumber")
+      DRCI.lower_ground("#{args.type} lumber")
       DRCC.get_crafting_item('saw', @bag, @bag_items, @belt)
     end
   end
