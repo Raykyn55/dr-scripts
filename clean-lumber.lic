@@ -54,10 +54,10 @@ class CleanLumber
   end
 
   def process_size(args, size)
-    unless /What were you/ =~ DRC.bput("get #{args.type} #{size} from my #{args.source}", 'You get', 'You carefully remove', 'What were you')
+    unless DRCI.get_item?("#{args.type} #{size}", args.source)
       if size == 'deed'
         if /The worker explains/ =~ DRC.bput("Tap my deed", /^You pick up the/, /^The worker explains/)
-          DRC.bput("Put my deed in #{args.storage}", /^You put your/)
+          DRCI.put_away_item?("#{args.type} deed", args.storage)
           return process_size(args, size)
         end
       end
