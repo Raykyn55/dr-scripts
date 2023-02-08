@@ -27,6 +27,10 @@ class CleanLumber
     @drawknife = @settings.shaping_tools.find { |tool| tool =~ /.*drawknife/}
    
     unless args.table_saw
+      unless @saw && @drawknife
+        DRC.message("Must define both saw and drawknife in yaml under shaping_tools")
+        exit
+      end
       DRCI.stow_hands
       DRCC.repair_own_tools(get_data('crafting')['blacksmithing'][@hometown], [@saw, @drawknife], @bag, @bag_items, @belt) if @self_repair
       DRCC.get_crafting_item(@saw, @bag, @bag_items, @belt)
