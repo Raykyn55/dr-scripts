@@ -72,7 +72,7 @@ class CleanLumber
       DRC.bput("cut #{size} with table saw", /Roundtime/)
     else
       size = DRC.left_hand.split.last
-      until DRC.bput("cut #{size} with my #{saw}", 'roundtime', 'you complete', 'ready to be carved') =~ /you complete|ready to be carved/
+      until DRC.bput("cut #{size} with my #{@saw}", 'roundtime', 'you complete', 'ready to be carved') =~ /you complete|ready to be carved/
         waitrt?
         DRCA.crafting_magic_routine(@settings)
       end
