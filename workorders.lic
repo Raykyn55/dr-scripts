@@ -680,7 +680,7 @@ class WorkOrders
             when 'You realize you have items bundled with the logbook'
                 DRC.bput('untie my logbook', 'You untie')
                 trash = [DRC.left_hand,DRC.right_hand].find { |thing| thing !~ /logbook/i }
-                DRCI.dispose_trash(thing, @settings.worn_trashcan, @settings.worn_trashcan_verb)
+                DRCI.dispose_trash(trash, @settings.worn_trashcan, @settings.worn_trashcan_verb)
             end
         end
         DRCC.stow_crafting_item('logbook', @bag, @belt)
