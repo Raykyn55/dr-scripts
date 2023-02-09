@@ -201,7 +201,8 @@ class Pick
       echo "No boxes to pop"
       exit
     end
-    DRC.message("Boxes to pop: #{@boxes_by_bag.values.flatten.size}")
+    @boxes_remaining = @boxes_by_bag.values.flatten.size
+    DRC.message("Boxes to pop: #{@boxes_remaining}")
   end
 
   def remove_hindering_gear
@@ -253,6 +254,7 @@ class Pick
         DRCI.get_item?(box_noun, source)
         balance_lockpick_container
         attempt_open(box_noun)
+        DRC.message("Boxes remaining: #{@boxes_remaining -= 1}")
       end
       break if stop_picking?
     end
