@@ -233,7 +233,7 @@ class WorkOrders
         if @workorders_materials['custom'][base] && DRCI.exists?("#{type} #{base}", @bag)
             deed_item("#{type} #{base}")
         else
-            if scrap && !@retain_crafting_materials
+            if scrap && !@retain_crafting_materials && DRCI.get_item("#{materials_info['stock-name']} #{base}", @bag)
                 trash_crafting_item("#{materials_info['stock-name']} #{base}", info) 
             elsif scrap
                 deed_item("#{type} #{base}")
@@ -428,7 +428,6 @@ class WorkOrders
         item['part'] += ['water', 'alcohol'] # add the bits we might need to parts array for purchase and disposal
         item['part'].each { |part| buy_material_singles(info, materials_info[part], 1, part) } # purchase one of each of these bits
         buy_material_singles(get_data('crafting')['blacksmithing'][@hometown], materials_info['coal'], 1, 'nugget') && item['part'] += ['coal nugget'] # Buy a single coal nugget, plenty, and add it to our parts list
-        echo item['part']
         return item['part'] # Return a list of parts for disposal at the end.
     end
 
