@@ -192,6 +192,8 @@ class Burgle
     #don't bother heading to the right area, if following
     travel_to_burgle_room unless @follow
 
+    DRCI.clean_feet
+    
     execute_extra_scripts(@burgle_before_scripts)
     get_entry(@entry_type) unless @follow
 
@@ -199,8 +201,6 @@ class Burgle
     DRC.bput('stop play','In the name of love','You stop playing','But you\'re not performing anything') if (Script.running?('performance') || Script.running?('play'))
 
     DRC.wait_for_script_to_complete('buff', ['burgle']) if @settings.waggle_sets['burgle']
-
-    DRCI.clean_feet
 
     DRC.fix_standing
     #ensure you're in hiding or invis before starting
