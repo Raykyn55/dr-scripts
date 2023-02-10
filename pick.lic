@@ -252,13 +252,14 @@ class Pick
     @boxes_by_bag.each do |source, boxes|
       boxes.each do |box_noun|
         DRCI.get_item?(box_noun, source)
+        DRC.message("Boxes remaining in your bags: #{@boxes_remaining -= 1}")
         if first_box
-          DRCI.give_item?(@player, box_noun)
+          DRCI.give_item?(@player)
           first_box = false
           next
         else
           current = accept_box
-          DRCI.give_item?(@player, box_noun)
+          DRCI.give_item?(@player)
           Flags.reset('box-offered')
           loot(current)
           dispose_empty_box(current)
@@ -268,6 +269,7 @@ class Pick
     current = accept_box
     loot(current)
     dispose_empty_box(current)
+    DRC.message("That's the last one! #{@boxes_by_bag.values.flatten.size} boxes picked by #{@player.capitalize}. Don't forget a tip!")
   end
 
   def pickfor_loop
