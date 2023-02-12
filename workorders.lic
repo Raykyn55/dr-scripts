@@ -280,7 +280,7 @@ class WorkOrders
             buy_material_singles(info, materials_info[part], quantity, part)
         end
         DRCC.fount(info['tool-room'], 1, info['fount'], quantity, @bag, @bag_items, @belt)
-        DRCI.stow_hands
+        DRCI.put_away_item?("fount", @bag)
         # Start crafting #
         DRCC.find_enchanting_room(@hometown, @work_room)
         quantity.times do
@@ -620,7 +620,7 @@ class WorkOrders
 
         volume ||= ingot_volume(type)
 
-        DRCI.stow_hands
+        DRCI.put_away_item?("#{type} ingot", @bag)
         @smelt = false
 
         if volume < quantity * item['volume']
@@ -633,7 +633,7 @@ class WorkOrders
             end
         end
 
-        DRCI.stow_hands
+        DRCI.put_away_item?("#{type} ingot", @bag)
 
         if volume < quantity * item['volume']
             echo('out of material/deeds')
@@ -659,7 +659,7 @@ class WorkOrders
     def request_work_order(recipes, npc_rooms, npc, npc_last_name, discipline, logbook, diff)
         match_names = recipes.map { |x| x['name'] }
         diff ||= 'challenging'
-        DRCI.stow_hands
+        [DRC.right_hand,DRC.left_hand].each { |item| DRCI.put_away_item?(item, @bag) }
         500.times do
             find_npc(npc_rooms, npc_last_name)
             DRCC.get_crafting_item("#{logbook} logbook", @bag, @bag_items, @belt)
@@ -718,7 +718,7 @@ class WorkOrders
     end
 
     def complete_work_order(info)
-        DRCI.stow_hands
+        [DRC.right_hand,DRC.left_hand].each { |item| DRCI.put_away_item?(item, @bag) }
         loop do
             find_npc(info['npc-rooms'], info['npc_last_name'])
             DRCC.get_crafting_item("#{info['logbook']} logbook", @bag, @bag_items, @belt)
