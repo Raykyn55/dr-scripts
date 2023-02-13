@@ -647,7 +647,7 @@ class WorkOrders
     def smelt(type)
         DRCC.find_empty_crucible(@hometown)
         2.times do
-            return unless DRCI.get_item?("#{type} ingot", @bag)
+            DRCI.get_item?("#{type} ingot", @bag)
             DRCI.put_away_item_unsafe("#{type} ingot", "crucible")
         end
         DRC.wait_for_script_to_complete('smelt')
@@ -659,7 +659,7 @@ class WorkOrders
     def request_work_order(recipes, npc_rooms, npc, npc_last_name, discipline, logbook, diff)
         match_names = recipes.map { |x| x['name'] }
         diff ||= 'challenging'
-        [DRC.right_hand,DRC.left_hand].each { |item| DRCI.put_away_item?(item, @bag) }
+        [DRC.right_hand,DRC.left_hand].compact.each { |item| DRCI.put_away_item?(item, @bag) }
         500.times do
             find_npc(npc_rooms, npc_last_name)
             DRCC.get_crafting_item("#{logbook} logbook", @bag, @bag_items, @belt)
@@ -718,7 +718,7 @@ class WorkOrders
     end
 
     def complete_work_order(info)
-        [DRC.right_hand,DRC.left_hand].each { |item| DRCI.put_away_item?(item, @bag) }
+        [DRC.right_hand,DRC.left_hand].compact.each { |item| DRCI.put_away_item?(item, @bag) }
         loop do
             find_npc(info['npc-rooms'], info['npc_last_name'])
             DRCC.get_crafting_item("#{info['logbook']} logbook", @bag, @bag_items, @belt)
