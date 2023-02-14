@@ -43,6 +43,10 @@ class SlimRemedy
             exit
         end
     end
+
+    def clean_container
+        pause 0.1 until /empty|contents/ =~ DRC.bput("tilt my #{@container}", /^The .* is empty/, /^You grab the .* and prepare to dump it out/, /^You grab the .* and (pour away its contents|toss the contents away)/)
+    end
     
     def swap_tool(next_tool, skip = false)
         unless DRC.right_hand.include?(next_tool)
@@ -68,8 +72,9 @@ class SlimRemedy
 
         swap_tool(@container)
         check_hand(@container)
+        clean_container
         swap_tool(@parts.first)
-        DRC.bput("put my #{@parts.first} in my #{@container}", /^You put your/)
+        DRCI.put_away_item?(@parts.first, @container)
         swap_tool(@main_tool)
         return command = @container.include?('mortar') ? "crush #{@parts.first} in #{@container} with my #{@main_tool}" : @home_command
     end
