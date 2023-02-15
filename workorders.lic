@@ -651,7 +651,6 @@ class WorkOrders
             DRCI.put_away_item_unsafe?("#{type} ingot", "crucible")
         end
         DRC.wait_for_script_to_complete('smelt')
-        DRCI.stow_hands
     end
 
 ################       TASK MASTER HANDLING        ######################
