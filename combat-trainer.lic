@@ -4144,6 +4144,9 @@ class GameState
 
     @pounce_to_engage = settings.pounce_to_engage
     echo(" @pounce_to_engage: #{@pounce_to_engage}") if $debug_mode_ct
+    
+    @stomp_on_cooldown = settings.war_stomp_on_cooldown
+    echo("  @stomp_on_cooldown: #{@stomp_on_cooldown}") if $debug_mode_ct
 
     if @use_analyze_combos && DRStats.barbarian?
       Flags.add('ct-accuracy-ready', 'You sense your combat accuracy decrease')
