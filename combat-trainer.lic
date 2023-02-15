@@ -2738,7 +2738,7 @@ class TrainerProcess
     when /^Collect$/i
       game_state.sheath_whirlwind_offhand
       retreat
-      game_state.engage(game_state.npcs.first) unless game_state.npcs.empty? || game_state.retreating?
+      game_state.engage unless game_state.npcs.empty? || game_state.retreating?
       collect(@forage_item)
       waitrt?
       game_state.wield_whirlwind_offhand
@@ -2788,7 +2788,7 @@ class TrainerProcess
 
     game_state.sheath_whirlwind_offhand if game_state.currently_whirlwinding
     retreat
-    game_state.engage(game_state.npcs.first) unless game_state.npcs.empty? || game_state.retreating?
+    game_state.engage unless game_state.npcs.empty? || game_state.retreating?
     bput("get my #{@almanac}", 'You get', 'What were')
     if training_skill
       bput("turn #{@almanac} to #{training_skill}", 'You turn', 'You attempt to turn')
@@ -2937,11 +2937,11 @@ class TrainerProcess
     when 'Analyze what'
       case bput('face next', 'There is nothing else', 'You turn', 'What are you trying', 'Face what')
       when 'There is nothing else', 'What are you trying'
-        game_state.engage(game_state.npcs.first)
+        game_state.engage
       end
       analyze(game_state, fail_count)
     when 'You must be closer'
-      game_state.engage(game_state.npcs.first)
+      game_state.engage
     when 'Your analysis reveals a massive opening'
       return
     when 'You fail to find any holes'
@@ -2977,7 +2977,7 @@ class TrainerProcess
     if DRSkill.getrank('Astrology') <= 120
       DRCMM.predict('weather')
       waitrt?
-      game_state.engage(game_state.npcs.first)
+      game_state.engage
     else
       retreat
       check_heavens(game_state)
@@ -3209,7 +3209,7 @@ class AttackProcess
   def check_face(game_state)
     return unless Flags['ct-face-what']
 
-    game_state.engage(game_state.npcs.first)
+    game_state.engage
     Flags.reset('ct-face-what')
   end
 
@@ -3276,7 +3276,7 @@ class AttackProcess
     end
 
     if reget(5, 'You aren\'t close enough to attack', 'It would help if you were closer')
-      game_state.engage(game_state.npcs.first)
+      game_state.engage
     else
       game_state.action_taken
     end
@@ -3554,7 +3554,7 @@ class AttackProcess
     case bput(action, 'Roundtime', 'close enough', 'What are you', 'There is nothing', 'must be closer', 'Bumbling, you slip')
     when 'close enough', 'must be closer'
       return false if game_state.retreating?
-      game_state.engage(game_state.npcs.first)
+      game_state.engage
     when 'What are you', 'There is nothing'
       return false unless action.include?('whip')
       fput('face next')
@@ -3620,7 +3620,7 @@ class AttackProcess
       game_state.set_dance_queue
       case bput(game_state.next_dance_action, 'You must be closer', 'There is nothing else', 'What are you trying', /.*/)
       when 'You must be closer', 'There is nothing else', 'What are you trying'
-        game_state.engage(game_state.npcs.first)
+        game_state.engage
       end
       pause 0.5
       waitrt?
@@ -4277,10 +4277,12 @@ class GameState
     @equipment_manager.stow_weapon(weapon_training[skill])
   end
 
-  def engage(mob = nil)
-    if (@stomp_on_cooldown || @stomp_to_engage) && Flags['war-stomp-ready']
+  def engage
+    if @stomp_on_cooldown && !Flags['war-stomp-ready'] # If we're using stomp on cooldown but stomp isn't ready
+      return
+    elsif (@stomp_on_cooldown || @stomp_to_engage) && Flags['war-stomp-ready'] # if we're using stomp and stomp is ready
       Flags.reset('war-stomp-ready')
-      case DRC.bput("stomp #{mob}", /^As you feel your inner fire/, /^With a heaving flex of masterfully controlled muscles/, /You leap forward, kicking in a somersault/, /You begin sprinting forward, feeling as the wind/,
+      case DRC.bput("stomp", /^As you feel your inner fire/, /^With a heaving flex of masterfully controlled muscles/, /You leap forward, kicking in a somersault/, /You begin sprinting forward, feeling as the wind/,
           /You spring lightly into the air. For one frozen moment/, /Like a dust devil sent by Gizzbolf, you hop spinning wildly into the air/, /Bringing your prodigious Togpower to bear on/,
           /Swift and agile, you handspring into an easy/, /You crouch for but a heartbeat, and then leap with the acrobatic ease/, /Like an indefatigable avatar of Coshivi, you lope across the distance/,
           /You set yourself, poised for the opportunity that will see you vanquish your adversary/, /^You are not ready to perform another War Stomp/, /^What are you trying to attack/, 
@@ -4290,24 +4292,15 @@ class GameState
         @stomp_to_engage,@stomp_on_cooldown = [false,false]
         Flags['war-stomp-ready'] = false
       when /You are not ready to perform another War Stomp/
-        engage(mob)
+        engage
       end
-    elsif @stomp_on_cooldown && mob == nil
-      return
-    elsif @pounce_to_engage && Flags['pounce-ready']
+    elsif @pounce_to_engage && Flags['pounce-ready'] # if we're using pounce and pounce is ready
       Flags.reset('pounce-ready')
-      DRC.bput("pounce #{mob}", /^Roundtime/)
-    else
-      Flags.add('in-melee-range', /stops you from advancing any farther/, /You close to melee range on/)
-      case DRC.bput("engage #{mob}", /You are already at melee/, /You are already advancing/, /You begin to advance/, /^There is nothing else/, /is already quite dead/)
-      when /You are already at melee/, /There is nothing else/
-        Flags.delete('in-melee-range')
-      when /is already quite dead/
-        pause 2
-        return engage(mob)
+      DRC.bput("pounce", /^Roundtime/)
+    else # standard engage
+      case DRC.bput("engage", /^You are already at melee/, /^You are already advancing/, /^You begin to advance/, /^There is nothing else/, /is already quite dead/)
       when /You are already advancing/, /You begin to advance/
-        pause 0.1 until Flags['in-melee-range']
-        Flags.delete('in-melee-range')
+        pause 2
       end
     end
   end
@@ -5055,7 +5048,7 @@ class GameState
       Flags.reset("ct-#{combo_type}-ready")
       return false
     when 'You must be closer'
-      engage(npcs.first)
+      engage
     when 'You fail to find any'
       perform_analyze?(combo_type, expertise_requirement)
     when 'Analyze what?'
@@ -5133,7 +5126,6 @@ before_dying do
   Flags.delete('ct-barbarian-whirlwind')
   Flags.delete('ct-barbarian-whirlwind-expired')
   Flags.delete('war-stomp-ready')
-  Flags.delete('in-melee-range')
   Flags.delete('pounce-ready')
 end
 
