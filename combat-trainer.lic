@@ -4287,7 +4287,7 @@ class GameState
         @stomp_to_engage,@stomp_on_cooldown = [false,false]
         Flags['war-stomp-ready'] = false
       when /You are not ready to perform another War Stomp/
-        engage
+        engage(mob)
       end
     elsif @stomp_on_cooldown && mob == nil
       return
@@ -4299,11 +4299,9 @@ class GameState
       case DRC.bput("engage #{mob}", /You are already at melee/, /You are already advancing/, /You begin to advance/, /^There is nothing else/)
       when /You are already at melee/, /There is nothing else/
         Flags.delete('in-melee-range')
-        return
       when /You are already advancing/, /You begin to advance/
         pause 0.1 until Flags['in-melee-range']
         Flags.delete('in-melee-range')
-        return
       end
     end
   end
