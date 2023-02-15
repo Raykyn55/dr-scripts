@@ -5051,7 +5051,7 @@ class GameState
       Flags.reset("ct-#{combo_type}-ready")
       return false
     when 'You must be closer'
-      engage
+      engage(npcs.first)
     when 'You fail to find any'
       perform_analyze?(combo_type, expertise_requirement)
     when 'Analyze what?'
