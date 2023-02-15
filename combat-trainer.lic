@@ -2754,7 +2754,7 @@ class TrainerProcess
     when /^Collect$/i
       game_state.sheath_whirlwind_offhand
       retreat
-      put('engage') unless game_state.npcs.empty? || game_state.retreating?
+      game_state.engage unless game_state.npcs.empty? || game_state.retreating?
       collect(@forage_item)
       waitrt?
       game_state.wield_whirlwind_offhand
@@ -2804,7 +2804,7 @@ class TrainerProcess
 
     game_state.sheath_whirlwind_offhand if game_state.currently_whirlwinding
     retreat
-    fput('engage') unless game_state.npcs.empty? || game_state.retreating?
+    game_state.engage unless game_state.npcs.empty? || game_state.retreating?
     bput("get my #{@almanac}", 'You get', 'What were')
     if training_skill
       bput("turn #{@almanac} to #{training_skill}", 'You turn', 'You attempt to turn')
@@ -2953,12 +2953,11 @@ class TrainerProcess
     when 'Analyze what'
       case bput('face next', 'There is nothing else', 'You turn', 'What are you trying', 'Face what')
       when 'There is nothing else', 'What are you trying'
-        fput('engage')
-        pause 2
+        game_state.engage
       end
       analyze(game_state, fail_count)
     when 'You must be closer'
-      fput('engage')
+      game_state.engage
     when 'Your analysis reveals a massive opening'
       return
     when 'You fail to find any holes'
@@ -2994,7 +2993,7 @@ class TrainerProcess
     if DRSkill.getrank('Astrology') <= 120
       DRCMM.predict('weather')
       waitrt?
-      fput('engage')
+      game_state.engage
     else
       retreat
       check_heavens(game_state)
@@ -3226,7 +3225,7 @@ class AttackProcess
   def check_face(game_state)
     return unless Flags['ct-face-what']
 
-    fput("engage #{game_state.npcs.first}")
+    game_state.engage(game_state.npcs.first)
     Flags.reset('ct-face-what')
   end
 
@@ -3293,8 +3292,7 @@ class AttackProcess
     end
 
     if reget(5, 'You aren\'t close enough to attack', 'It would help if you were closer')
-      fput('engage')
-      pause 6
+      game_state.engage
     else
       game_state.action_taken
     end
@@ -3572,8 +3570,7 @@ class AttackProcess
     case bput(action, 'Roundtime', 'close enough', 'What are you', 'There is nothing', 'must be closer', 'Bumbling, you slip')
     when 'close enough', 'must be closer'
       return false if game_state.retreating?
-      fput('engage')
-      pause 2.5
+      game_state.engage
     when 'What are you', 'There is nothing'
       return false unless action.include?('whip')
       fput('face next')
@@ -3639,8 +3636,7 @@ class AttackProcess
       game_state.set_dance_queue
       case bput(game_state.next_dance_action, 'You must be closer', 'There is nothing else', 'What are you trying', /.*/)
       when 'You must be closer', 'There is nothing else', 'What are you trying'
-        fput('engage')
-        pause 2
+        game_state.engage
       end
       pause 0.5
       waitrt?
@@ -4156,6 +4152,12 @@ class GameState
     @cambrinth_invoke_exact_amount = settings.cambrinth_invoke_exact_amount
     echo("  @cambrinth_invoke_exact_amount: #{@cambrinth_invoke_exact_amount}") if $debug_mode_ct
 
+    @stomp_to_engage = settings.war_stomp_to_engage
+    echo(" @stomp_to_engage: #{@stomp_to_engage}") if $debug_mode_ct
+
+    @pounce_to_engage = settings.pounce_to_engage
+    echo(" @pounce_to_engage: #{@pounce_to_engage}") if $debug_mode_ct
+
     if @use_analyze_combos && DRStats.barbarian?
       Flags.add('ct-accuracy-ready', 'You sense your combat accuracy decrease')
       Flags['ct-accuracy-ready'] = true
@@ -4286,6 +4288,38 @@ class GameState
     return if skill.eql?('Tactics')
 
     @equipment_manager.stow_weapon(weapon_training[skill])
+  end
+
+  def engage(mob = nil)
+    if @stomp_to_engage && Flags['war-stomp-ready']
+      Flags.reset('war-stomp-ready')
+      case DRC.bput("stomp #{mob}", /^As you feel your inner fire/, /^With a heaving flex of masterfully controlled muscles/, /You leap forward, kicking in a somersault/, /You begin sprinting forward, feeling as the wind/,
+          /You spring lightly into the air. For one frozen moment/, /Like a dust devil sent by Gizzbolf, you hop spinning wildly into the air/, /Bringing your prodigious Togpower to bear on/,
+          /Swift and agile, you handspring into an easy/, /You crouch for but a heartbeat, and then leap with the acrobatic ease/, /Like an indefatigable avatar of Coshivi, you lope across the distance/,
+          /You set yourself, poised for the opportunity that will see you vanquish your adversary/, /^You are not ready to perform another War Stomp/, /^What are you trying to attack/, 
+          /^You have not yet been taught the proper techniques to perform a War Stomp/, /^Stomp where/)
+      when /You have not yet been taught the proper techniques to perform a War Stomp/, /Stomp where/
+        DRC.message("You have elected to War Stomp, but you do not know the ability. Learn it or remove war_stomp_on_cooldown from your yaml")
+        @stomp_to_engage = false
+        Flags['war-stomp-ready'] = false
+      when /You are not ready to perform another War Stomp/
+        engage
+      end
+    elsif @pounce_to_engage && Flags['pounce-ready']
+      Flags.reset('pounce-ready')
+      DRC.bput("pounce #{mob}", /^Roundtime/)
+    else
+      Flags.add('in-melee-range', /stops you from advancing any farther/, /You close to melee range on/)
+      case DRC.bput("engage #{mob}", /You are already at melee/, /You are already advancing/, /You begin to advance/)
+      when /You are already at melee/
+        Flags.delete('in-melee-range')
+        return
+      when /You are already advancing/, /You begin to advance/
+        pause 0.1 until Flags['in-melee-range']
+        Flags.delete('in-melee-range')
+        return
+      end
+    end
   end
 
   # Wields a weapon to train the specified skill,
@@ -5031,7 +5065,7 @@ class GameState
       Flags.reset("ct-#{combo_type}-ready")
       return false
     when 'You must be closer'
-      fput('engage')
+      engage
     when 'You fail to find any'
       perform_analyze?(combo_type, expertise_requirement)
     when 'Analyze what?'
