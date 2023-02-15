@@ -5143,6 +5143,8 @@ before_dying do
   Flags.delete('ct-barbarian-whirlwind')
   Flags.delete('ct-barbarian-whirlwind-expired')
   Flags.delete('war-stomp-ready')
+  Flags.delete('in-melee-range')
+  Flags.delete('pounce-ready')
 end
 
 $COMBAT_TRAINER = CombatTrainer.new
