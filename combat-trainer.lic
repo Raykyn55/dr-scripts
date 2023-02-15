@@ -3677,7 +3677,10 @@ class AttackProcess
 
     waitrt?
 
-    return false if Flags['ct-attack-out-of-range']
+    if Flags['ct-attack-out-of-range']
+      game_state.engage
+      return use_charged_maneuver(action, game_state)
+    end
 
     case attempt
     when /^You must rest a bit longer before attempting that maneuver again/
@@ -4296,9 +4299,12 @@ class GameState
       DRC.bput("pounce #{mob}", /^Roundtime/)
     else
       Flags.add('in-melee-range', /stops you from advancing any farther/, /You close to melee range on/)
-      case DRC.bput("engage #{mob}", /You are already at melee/, /You are already advancing/, /You begin to advance/, /^There is nothing else/)
+      case DRC.bput("engage #{mob}", /You are already at melee/, /You are already advancing/, /You begin to advance/, /^There is nothing else/, /is already quite dead/)
       when /You are already at melee/, /There is nothing else/
         Flags.delete('in-melee-range')
+      when /is already quite dead/
+        pause 2
+        return engage(mob)
       when /You are already advancing/, /You begin to advance/
         pause 0.1 until Flags['in-melee-range']
         Flags.delete('in-melee-range')
