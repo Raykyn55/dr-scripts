@@ -648,7 +648,7 @@ class WorkOrders
         DRCC.find_empty_crucible(@hometown)
         2.times do
             DRCI.get_item?("#{type} ingot", @bag)
-            DRCI.put_away_item_unsafe("#{type} ingot", "crucible")
+            DRCI.put_away_item_unsafe?("#{type} ingot", "crucible")
         end
         DRC.wait_for_script_to_complete('smelt')
         DRCI.stow_hands
