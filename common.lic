@@ -158,14 +158,10 @@ module DRC
         timer = Time.now
         next
       when /^You don't seem to be able to move to do that/
-        room = Room.current.id
         next unless matches.include?(response)
       when /^After failing to draw a breath for what feels like forever/
         fix_standing
         waitrt?
-        fput('stow feet')
-        fput('stow feet')
-        wait_for_script_to_complete('go2', [room])
         put message
         timer = Time.now
         next
@@ -186,16 +182,12 @@ module DRC
         timer = Time.now
         next
       when /^You can't do that while entangled in a web/
-        until XMLData.indicator['IconWEBBED'] == 'n'
-          pause 0.1 
-        end
+        while webbed? do pause 0.1 end
         put message
         timer = Time.now
         next
       when /^You are still stunned/, 
-        until XMLData.indicator['IconSTUNNED'] == 'n'
-          pause 0.1 
-        end
+        while stunned? do pause 0.1 end
         put message
         timer = Time.now
         next
