@@ -185,8 +185,17 @@ module DRC
         put message
         timer = Time.now
         next
-      when /^You are still stunned/, /^You can't do that while entangled in a web/
-        pause 0.5
+      when /^You can't do that while entangled in a web/
+        until XMLData.indicator['IconWEBBED'] == 'n'
+          pause 1 
+        end
+        put message
+        timer = Time.now
+        next
+      when /^You are still stunned/, 
+        until XMLData.indicator['IconSTUNNED'] == 'n'
+          pause 1 
+        end
         put message
         timer = Time.now
         next
