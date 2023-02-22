@@ -271,11 +271,9 @@ class Tinker
 
   def finish
     stamp
-    DRCC.stow_crafting_item(DRC.right_hand, @bag, nil)
+    DRCC.stow_crafting_item(DRC.right_hand, @bag, @belt)
     DRC.message("#{@noun} complete!")
-    if /You pick up/ =~ DRC.bput("lift", /^You pick up/, /^There are no/)
-      DRCI.put_away_item?(DRC.right_hand, @bag)
-    end
+    DRCI.lift?(nil, @bag)
     magic_cleanup
     exit
   end
