@@ -245,7 +245,7 @@ class Shape
     end
     DRCC.stow_crafting_item(DRC.right_hand, @bag, @belt)
     DRC.message("#{@noun} complete!")
-    DRCC.stow_crafting_item(DRCI.right_hand, @bag, @belt) if DRCI.lift?
+    DRCC.stow_crafting_item(DRC.right_hand, @bag, @belt) if DRCI.lift?
     magic_cleanup
     exit
   end
