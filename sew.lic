@@ -282,7 +282,7 @@ class Sew
     end
     DRCC.stow_crafting_item(DRC.right_hand, @bag, @belt)
     DRC.message("#{@noun} Complete")
-    DRCC.stow_crafting_item(DRCI.lift?, @bag, @belt)
+    DRCC.stow_crafting_item(DRC.right_hand, @bag, @belt) if DRCI.lift?
     magic_cleanup
     exit
   end
