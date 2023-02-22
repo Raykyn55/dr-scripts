@@ -927,7 +927,7 @@ class Pick
   end
 
   before_dying do
-    DRCI.lift?("camp stool") if @@stool
+    DRCI.lift?("camp stool", true) if @@stool
     Flags.delete('disarm-trap-type')
     Flags.delete('disarm-shift')
     Flags.delete('more-traps')
