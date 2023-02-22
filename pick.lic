@@ -329,9 +329,6 @@ class Pick
       break if stop_picking?
     end
     DRC.fix_standing
-    if @@stool && DRCI.lift?
-      DRCI.stow_item?(@@stool)
-    end
     @equipment_manager.wear_items(@removed_items)
   end
 
@@ -929,7 +926,7 @@ class Pick
   end
 
   before_dying do
-    DRCI.lift_and_stow("camp stool") if @@stool
+    DRCI.lift?(@@stool, true) if @@stool
     Flags.delete('disarm-trap-type')
     Flags.delete('disarm-shift')
     Flags.delete('more-traps')
