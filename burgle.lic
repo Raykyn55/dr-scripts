@@ -192,7 +192,7 @@ class Burgle
     #don't bother heading to the right area, if following
     travel_to_burgle_room unless @follow
 
-    DRCI.clean_feet
+    DRCI.lift?('stow')
     
     execute_extra_scripts(@burgle_before_scripts)
     get_entry(@entry_type) unless @follow
