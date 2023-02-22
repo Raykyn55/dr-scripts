@@ -552,7 +552,7 @@ class WorkOrders
                 return redeem_deed(deed_type, base)
             end
             pause 0.5
-            DRCI.lift_specific?("#{deed_type} #{base}")
+            DRCI.lift?("#{deed_type} #{base}")
             true
         else
             DRC.message("Missing the required deeds for #{deed_type}")
@@ -629,11 +629,10 @@ class WorkOrders
                 redeem_deed(type, 'ingot')
             else
                 echo('out of material/deeds')
+                DRCI.put_away_item?("#{type} ingot", @bag)
                 return false
             end
         end
-
-        DRCI.put_away_item?("#{type} ingot", @bag)
 
         if volume < quantity * item['volume']
             echo('out of material/deeds')
