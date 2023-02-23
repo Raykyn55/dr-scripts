@@ -242,7 +242,7 @@ module DRCA
   def ritual(data, settings)
     DRC.retreat(settings.ignored_npcs) unless data['skip_retreat']
     DRC.release_invisibility
-    DRC.set_stance('shield')
+    DRC.set_stance('shield') unless data['skip_retreat']
 
     command = 'prepare'
     command = data['prep'] if data['prep']
@@ -859,9 +859,14 @@ module DRCA
     elsif DRStats.thief?
       start_khris(spells, settings)
     else
+      spells
+            .select! { |name, data| data['night'] ? UserVars.sun['night'] : true }
+            .select! { |name, data| data['day'] ?  UserVars.sun['day'] : true }
+
       spells.values
             .select { |spell| spell['use_auto_mana'] }
             .each { |spell| check_discern(spell, settings) }
+
       cast_spells(spells, settings, settings.waggle_force_cambrinth)
     end
   end
