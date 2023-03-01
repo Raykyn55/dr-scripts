@@ -226,10 +226,7 @@ class InventoryManager
   end
 
   def add_servant_inv
-    unless DRSpells.known_spells['Piercing Gaze']
-      DRC.message "You do not know the spell Piercing Gaze. Do you even moonie?"
-      exit
-    end
+    return DRC.message "You do not know the spell Piercing Gaze. Do you even moonie?" unless DRSpells.known_spells['Piercing Gaze']
 
     remove_previous_entries('(Shadow Servant)')
 
