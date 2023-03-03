@@ -2155,7 +2155,7 @@ class AbilityProcess
     check_nonspell_buffs(game_state)
     check_battle_cries(game_state)
     use_warhorn_or_egg(game_state) unless @warhorn_or_egg.nil? || @warhorn_or_egg.empty?
-    game_state.engage(true) unless (game_state.npcs.empty? || !@stomp_on_cooldown)
+    game_state.engage if @stomp_on_cooldown && game_state.npcs && Flags['war-stomp-ready']
     false
   end
 
@@ -2789,7 +2789,7 @@ class TrainerProcess
     game_state.sheath_whirlwind_offhand if game_state.currently_whirlwinding
     retreat
     game_state.engage unless game_state.npcs.empty? || game_state.retreating?
-    bput("get my #{@almanac}", 'You get', 'What were')
+    get_item?(@almanac)
     if training_skill
       bput("turn #{@almanac} to #{training_skill}", 'You turn', 'You attempt to turn')
     end
@@ -3070,7 +3070,7 @@ class TrainerProcess
     return if game_state.retreating?
     return if game_state.loaded || game_state.offhand?
     DRC.retreat
-    return unless /inside your (.*)\./ =~ DRC.bput("get my tessera", 'You get a .+ tessera from inside your (.*).', 'What were you')
+    return unless DRCI.get_item?('tessera')
     container = DRC.get_noun(Regexp.last_match(1))
     game_state.starlight_values['level'] = 0 if bput('ask my tessera about invest', 'You send your') == 'You send your'
     bput("put my tessera in my #{container}", 'You put', 'What were you')
@@ -4280,26 +4280,45 @@ class GameState
     @equipment_manager.stow_weapon(weapon_training[skill])
   end
 
-  def engage(stomp_check = false)
-    if @stomp_on_cooldown && !Flags['war-stomp-ready'] && stomp_check # If we're using stomp on cooldown but stomp isn't ready
-      return
-    elsif (@stomp_on_cooldown || @stomp_to_engage) && Flags['war-stomp-ready'] # if we're using stomp and stomp is ready
+  def engage
+    if (@stomp_on_cooldown || @stomp_to_engage) && Flags['war-stomp-ready'] # if we're using stomp and stomp is ready
       Flags.reset('war-stomp-ready')
-      case DRC.bput("stomp", /^As you feel your inner fire/, /^With a heaving flex of masterfully controlled muscles/, /You leap forward, kicking in a somersault/, /You begin sprinting forward, feeling as the wind/,
-          /You spring lightly into the air. For one frozen moment/, /Like a dust devil sent by Gizzbolf, you hop spinning wildly into the air/, /Bringing your prodigious Togpower to bear on/,
-          /Swift and agile, you handspring into an easy/, /You crouch for but a heartbeat, and then leap with the acrobatic ease/, /Like an indefatigable avatar of Coshivi, you lope across the distance/,
-          /You set yourself, poised for the opportunity that will see you vanquish your adversary/, /^You are not ready to perform another War Stomp/, /^What are you trying to attack/, 
-          /^You have not yet been taught the proper techniques to perform a War Stomp/, /^Stomp where/, /^You are too fatigued to perform a War Stomp/)
+      case DRC.bput("stomp",
+                    /^As you feel your inner fire/,
+                    /^With a heaving flex of masterfully controlled muscles/,
+                    /You leap forward, kicking in a somersault/,
+                    /You begin sprinting forward, feeling as the wind/,
+                    /You spring lightly into the air. For one frozen moment/,
+                    /Like a dust devil sent by Gizzbolf, you hop spinning wildly into the air/,
+                    /Bringing your prodigious Togpower to bear on/,
+                    /Swift and agile, you handspring into an easy/,
+                    /You crouch for but a heartbeat, and then leap with the acrobatic ease/,
+                    /Like an indefatigable avatar of Coshivi, you lope across the distance/,
+                    /You set yourself, poised for the opportunity that will see you vanquish your adversary/,
+                    /^You are not ready to perform another War Stomp/, /^What are you trying to attack/,
+                    /^You have not yet been taught the proper techniques to perform a War Stomp/,
+                    /^Stomp where/,
+                    /^You are too fatigued to perform a War Stomp/)
       when /You have not yet been taught the proper techniques to perform a War Stomp/, /Stomp where/
         DRC.message("You have elected to War Stomp, but you do not know the ability. Learn it or remove war_stomp_on_cooldown from your yaml")
-        @stomp_to_engage,@stomp_on_cooldown = [false,false]
+        @stomp_to_engage, @stomp_on_cooldown = [false, false]
         Flags['war-stomp-ready'] = false
       when /You are not ready to perform another War Stomp/, /You are too fatigued to perform a War Stomp/
         engage
       end
     elsif @pounce_to_engage && Flags['pounce-ready'] # if we're using pounce and pounce is ready
       Flags.reset('pounce-ready')
-      DRC.bput("pounce", /^Roundtime/)
+      case DRC.bput("pounce",
+                    /You angle yourself to knock .* to the ground/,
+                    /^What are you trying to attack/,
+                    /Doing your best impression of a house cat, you pounce on absolutely nothing at all./,
+                    /You're too tired from the last time you pounced on some prey./)
+      when /Doing your best impression/
+        DRC.message('You have elected to use Pounce, but you do not know the ability. Please remove this setting from your yaml: pounce_to_engage')
+        @pounce_to_engage = false
+      when /You're too tired/
+        engage
+      end
     else # standard engage
       case DRC.bput("engage", /^You (are already|begin to) (stealthily )?(advanc(e|ing)|at melee)/, /^There is nothing else/, /is already quite dead/, /^What do you want to advance towards/)
       when /You are already advancing/, /You begin to advance/, /You begin to stealthily advance/
