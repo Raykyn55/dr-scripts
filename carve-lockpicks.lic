@@ -48,10 +48,12 @@ class CarveLockpicks
 
     if args.ratio_last
       return DRC.message("No history to display") if UserVars.grands_ratio.empty?
+
       DRC.message("Most recent percentage of Grandmaster's to Master's picks: #{UserVars.grands_ratio.to_a.last.last}")
       exit
     elsif args.ratio_all
       return DRC.message("No history to display") if UserVars.grands_ratio.empty?
+
       DRC.message("Average of all recorded carving projects to date, Grandmaster's percentages: #{calc_ratio}")
       exit
     elsif args.ratio_reset
@@ -61,7 +63,7 @@ class CarveLockpicks
     end
 
     main_loop
-	end
+  end
 
   def calc_ratio
     total = 0
@@ -85,7 +87,7 @@ class CarveLockpicks
     DRC.message("Buying:\nMaster's rings: #{@mrings}\nGrandmaster's rings: #{@grings}")
     sleep 1
     verify_funds("lockpick ring", mord, gord)
-    
+
     grings.times do
       DRCT.buy_item(Room.current.id, "#{gord} lockpick ring")
       DRCI.put_away_item?("lockpick ring", @lockpick_carve_settings['grand_container'])
@@ -292,7 +294,7 @@ class CarveLockpicks
       DRC.message("Out of room for rings")
       exit
     end
-    
+
     DRCC.get_crafting_item("carving knife", @bag, @bag_items, @belt)
   end
 end
