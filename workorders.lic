@@ -88,7 +88,7 @@ class WorkOrders
 
         DRCI.stow_hands
 
-        if @workorders_repair && !@workorders_repair_own_tools
+        if @workorders_repair && @workorders_repair_own_tools
             DRC.wait_for_script_to_complete('repair', ['self_repair', *tools])
         elsif @workorders_repair
             DRC.wait_for_script_to_complete('repair', tools)
