@@ -278,7 +278,7 @@ stock:
     stock-value: 150
   bone backer:
     stock-value: 100
-  leather strips:
+  leather strip:
     stock-value: 625
   arrow flights:
     stock-value: 62
@@ -834,7 +834,7 @@ tailoring:
     << : *theren_tailoring
   Therenborough:
     << : *theren_tailoring
-  Shard: &ilithi_tailoring
+  Shard:
     npc: Jakke
     npc_last_name: Jakke
     npc-rooms:
@@ -968,7 +968,7 @@ tailoring:
     - 17133
     - 17140
     logbook: outfitting
-    repair-room: 8887 #temporarily using forging society clerk because outfitting society has no clerk currently.
+    repair-room: 17136
     repair-npc: clerk
     stock-room: 17134
     tool-room: 17136
@@ -1073,7 +1073,7 @@ shaping:
     glue-number: 13
     stain-number: 14
     idle-room:
-  Shard: &ilithi_shaping
+  Shard:
     npc: Master
     npc_last_name: Master
     npc-rooms:
@@ -1196,7 +1196,7 @@ carving:
     << : *theren_carving
   Therenborough:
     << : *theren_carving
-  Shard: &ilithi_carving
+  Shard:
     npc: Master
     npc_last_name: Master
     npc-rooms:
@@ -1358,7 +1358,7 @@ remedies:
     << : *theren_remedies
   Therenborough:
     << : *theren_remedies
-  Shard: &ilithi_remedies
+  Shard:
     npc: Benzia
     npc_last_name: Benzia
     npc-rooms:
@@ -1450,7 +1450,7 @@ remedies:
     - 17148
     - 17149
     logbook: alchemy
-    repair-room: 17153 #temporarily using engineering society clerk because alchemy society has no clerk currently.
+    repair-room: 17143
     repair-npc: clerk
     stock-room: 17143
     stock-number: 1
@@ -1553,7 +1553,7 @@ artificing:
     repair-npc: Unspiek
     trash-room: 14767
     idle-room: 14770
-  Shard:  &ilithi_artificing
+  Shard:
     npc: Trainer
     npc_last_name: Trainer
     npc-rooms:
@@ -1726,7 +1726,7 @@ recipe_parts:
       part-room: 16409
       part-number:
     Boar Clan:
-      part-room: 8892
+      part-room: 8892 # Hibarnhvidar
       part-number:
     Hibarnhvidar:
       part-room: 8892
@@ -1757,7 +1757,7 @@ recipe_parts:
       part-room: 16409
       part-number:
     Boar Clan:
-      part-room: 8892
+      part-room: 8892 # Hibarnhvidar
       part-number:
     Hibarnhvidar:
       part-room: 8892
@@ -1797,7 +1797,7 @@ recipe_parts:
       part-room: 10755
       part-number:
     Boar Clan:
-      part-room: 8892
+      part-room: 8892 # Hibarnhvidar
       part-number:
     Hibarnhvidar:
       part-room: 8892
@@ -1917,7 +1917,7 @@ recipe_parts:
       part-room: 10755
       part-number:
     Boar Clan:
-      part-room: 8892
+      part-room: 8892 # Hibarnhvidar
       part-number: 
     Hibarnhvidar:
       part-room: 8892
@@ -1957,7 +1957,7 @@ recipe_parts:
       part-room: 16409
       part-number:
     Boar Clan:
-      part-room: 8892
+      part-room: 8892 # Hibarnhvidar
       part-number:
     Hibarnhvidar:
       part-room: 8892
@@ -2297,10 +2297,10 @@ recipe_parts:
       part-room: 10738
       part-number:
     Hibarnhvidar:
-      part-room: 19306 # Shard
+      part-room: 17152
       part-number:
     Boar Clan:
-      part-room: 19306 # Shard
+      part-room: 17152 # Hibarnhvidar
       part-number:
     Fang Cove:
       part-room: 14793
@@ -2329,7 +2329,7 @@ recipe_parts:
       part-room: 14773
       part-number:
     Hibarnhvidar:
-      part-room: 15523 # Hibarnhvidar
+      part-room: 15523
       part-number:
     Boar Clan:
       part-room: 15523 # Hibarnhvidar
@@ -2345,7 +2345,7 @@ recipe_parts:
       part-room: 14773
       part-number:
     Hibarnhvidar:
-      part-room: 15523 # Hibarnhvidar
+      part-room: 15523
       part-number:
     Boar Clan:
       part-room: 15523 # Hibarnhvidar
@@ -2361,7 +2361,7 @@ recipe_parts:
       part-room: 14773
       part-number:
     Hibarnhvidar:
-      part-room: 15523 # Hibarnhvidar
+      part-room: 15523
       part-number:
     Boar Clan:
       part-room: 15523 # Hibarnhvidar
@@ -2377,7 +2377,7 @@ recipe_parts:
       part-room: 14773
       part-number:
     Hibarnhvidar:
-      part-room: 15523 # Hibarnhvidar
+      part-room: 15523
       part-number:
     Boar Clan:
       part-room: 15523 # Hibarnhvidar
@@ -2393,7 +2393,7 @@ recipe_parts:
       part-room: 14773
       part-number:
     Hibarnhvidar:
-      part-room: 15523 # Hibarnhvidar
+      part-room: 15523
       part-number:
     Boar Clan:
       part-room: 15523 # Hibarnhvidar
@@ -2401,3 +2401,4 @@ recipe_parts:
     Fang Cove:
       part-room: 14784
       part-number:
+ 
