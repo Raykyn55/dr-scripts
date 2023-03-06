@@ -89,9 +89,9 @@ class WorkOrders
         DRCI.stow_hands
 
         if @workorders_repair && !@workorders_repair_own_tools
-            DRCC.repair_tools(tools, @bag, @belt, @hometown, @settings)
+            DRC.wait_for_script_to_complete('repair', ['self_repair', *tools])
         elsif @workorders_repair
-            repair_own_tools(info, tools) if @workorders_repair_own_tools
+            DRC.wait_for_script_to_complete('repair', tools)
         end        
     end
 
@@ -123,26 +123,22 @@ class WorkOrders
         withdraw_funds(item, book, quantity, base, materials_info) unless repair
 
         if repair && @workorders_repair_own_tools
-            repair_own_tools(info, tools)
+            DRC.wait_for_script_to_complete('repair', ['self_repair', *tools])
             exit
         elsif repair
-            DRCC.repair_tools(tools, @bag, @belt, @hometown, @settings)
+            DRC.wait_for_script_to_complete('repair', tools)
             exit
         end
 
         send(craft_method, info, materials_info, item, quantity, book, script, base)
 
-        DRCC.repair_tools(tools, @bag, @belt, @hometown, @settings, false) if @workorders_repair && !@workorders_repair_own_tools
-
-        # tool_drop(get_data('crafting')['shaping'][@hometown], tools) if @workorders_repair && !@workorders_repair_own_tools
-
         complete_work_order(info)
 
-        DRCC.pickup_tools(@bag, @belt, @hometown, @settings) if @workorders_repair && !@workorders_repair_own_tools
-
-        # tool_pickup(get_data('crafting')['shaping'][@hometown]) if @workorders_repair && !@workorders_repair_own_tools
-
-        repair_own_tools(info, tools) if @workorders_repair_own_tools
+        if repair && @workorders_repair_own_tools
+            DRC.wait_for_script_to_complete('repair', ['self_repair', *tools])
+        elsif @workorders_repair
+            DRC.wait_for_script_to_complete('repair', tools)
+        end
     end
     
     def set_discipline_info(discipline, item)
