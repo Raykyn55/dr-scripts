@@ -7657,12 +7657,12 @@ artificing:
     - congruence sigil-scroll
     - rod
   - name: a celestial beacon
-    noun: heron bead
+    noun: gem
     chapter: 2
-    work_order: true
+    work_order: false
     part:
     - abolition sigil-scroll
-    - bead
+    - gem
   - name: a wind trinket
     noun: totem
     chapter: 2
