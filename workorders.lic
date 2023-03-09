@@ -686,7 +686,7 @@ class WorkOrder
         else
           DRCT.buy_item(data['part-room'], part)
         end
-        DRCC.stow_crafting_item(part, @bag, @belt)
+        DRCC.stow_crafting_item(part.split.last, @bag, @belt)
       end
     end
   end
