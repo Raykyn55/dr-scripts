@@ -2,7 +2,7 @@
   All in one training and workorder script for crafting
 =end
 
-custom_require.call(%w[common common-crafting common-items common-money common-travel drinfomon events])
+custom_require.call(%w[common common-crafting common-items common-money common-travel events])
 
 class WOData
   attr_accessor :hard_thresholds, :challenging_thresholds, :easy_thresholds, :tailoring, :blacksmithing, :weaponsmithing, :armorsmithing, :remedies, :artificing, :bone_carving, :stone_carving, :shaping, :tinkering, :rank_map
