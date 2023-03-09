@@ -3010,7 +3010,6 @@ class TrainerProcess
       case DRC.bput('face next', 'There is nothing else', 'You turn', 'What are you trying', 'Face what')
       when 'There is nothing else', 'What are you trying'
         game_state.engage
-        pause 2
       end
       analyze(game_state, fail_count)
     when 'You must be closer'
