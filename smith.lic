@@ -44,7 +44,7 @@ class Smith
     
     unless args.here || Script.running?('workorders')
       total_cost = DRCC.crafting_cost(recipe, hometown, parts, 1, args.buy ? materials_info : false)
-      DRCM.ensure_copper_on_hand(total_cost, settings)
+      DRCM.ensure_copper_on_hand(total_cost, settings, hometown)
     end
 
     smith(args.material, discipline, recipe, type, parts, args.buy, args.stamp, args.temper, args.hone, args.balance, args.lighten, args.reinforce, args.here, hometown, materials_info)
@@ -97,12 +97,12 @@ class Smith
   def dispose_scrap(discipline, recipe, materials_info)
     return unless materials_info['stock-volume'] > recipe['volume']
 
-    DRCI.dispose_trash("#{materials_info['stock-name']} ingot")
+    DRCI.dispose_trash("#{materials_info['stock-name']} ingot") if DRCI.get_item?("#{materials_info['stock-name']} ingot", @bag)
   end
 
   def dispose_parts(discipline, parts)
     parts.each do |part|
-      DRCI.dispose_trash(part)
+      DRCI.dispose_trash(part) if DRCI.get_item?(part, @bag)
     end
   end
 end
