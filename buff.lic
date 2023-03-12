@@ -61,7 +61,7 @@ class Waggle
     if DRStats.warrior_mage? && (args.charge || settings.buff_max_elemental_charge)
       unless /You have reached the limits/i =~ DRC.bput("Pathway sense", /^You have reached the limits/, /^Your body is aligned with the Elemental Plane/)
         while /bigger charge/i =~ DRC.bput("summon admittance", /bigger charge/, /reached your limit/)
-        waitrt?
+          waitrt?
         end
       end
     end
