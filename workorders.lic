@@ -341,14 +341,17 @@ class WorkOrder
       end
     end
 
-    if @workorders_materials['custom'][base] && DRCI.exists?("#{type} #{base}", @bag)
-      deed_item("#{type} #{base}")
+    if @workorders_materials['custom'][base]
+      method = :deed_item
     else
-      if scrap && !@retain_crafting_materials && DRCI.get_item("#{materials_info['stock-name']} #{base}", @bag)
-        trash_crafting_item("#{materials_info['stock-name']} #{base}")
+      if scrap && !@retain_crafting_materials
+        method = :trash_crafting_item
       elsif scrap
-        deed_item("#{type} #{base}")
+        method = :deed_item
       end
+    end
+    while method && DRCI.get_item?("#{type} #{base}", @bag)
+      send(method, "#{type} #{base}")
     end
   end
 
@@ -490,6 +493,7 @@ class WorkOrder
       2.times do fput("empty feet") end
     else
       DRCC.stow_crafting_item(DRC.right_hand, @bag, @belt)
+      DRCC.stow_crafting_item(DRC.right_hand, @bag, @belt) if DRCI.lift?
       DRCI.dispose_trash(DRC.left_hand, @settings.worn_trashcan, @settings.worn_trashcan_verb) if checkleft
     end
   end
@@ -807,14 +811,26 @@ class WorkOrder
     volume = 0
     while volume < (item['volume'] * quantity)
       if DRCI.get_item?("#{type} #{base}", @bag)
-        fput('combine')
+        # fput('combine')
+        unless /combine/ =~ DRC.bput("combine", /^You combine/, /^That .* is too large to add more to/)
+          # here we're stowing the first piece we had, which was too small
+          # The problem we can run into is with an order over half the size of a fresh deed,
+          # but we have two stacks which are both over half (can't combine) while neither are sufficient size
+          # It's not clear there is an elegant fix for this, the hope is it just doesn't crop up often enough
+          DRCI.put_away_item?("second #{type} #{base}", @bag)
+        end
         volume = material_volume(type, base)
         next
       end
       if volume < (item['volume'] * quantity)
         if redeem_deed(type, base)
           if [DRC.right_hand, DRC.left_hand].compact.size > 1
-            fput("combine")
+            unless /combine/ =~ DRC.bput("combine", /^You combine/, /^That .* is too large to add more to/)
+              # here we're stowing the first piece we had, which was too small
+              # The issue is when redeeming a new deed, it's likely to be a full stack
+              # so we want to just use the full stack, and we'll try combining them next time.
+              DRCI.put_away_item?("second #{type} #{base}", @bag)
+            end
           end
           volume = material_volume(type, base)
         else
