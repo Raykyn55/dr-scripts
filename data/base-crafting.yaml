@@ -1090,7 +1090,7 @@ shaping:
     - 9115
     shaping-rooms:
     - 9116
-    - 14878
+    # - 14878
     logbook: engineering
     repair-room: 9143
     repair-npc: clerk
@@ -1291,7 +1291,7 @@ carving:
     repair-room: 10734
     repair-npc: Glarstan
     stock-room: 10738
-    pattern-book: carving
+    pattern-book: shaping
     part-room: 10737
     tool-room: 10737
     clamps-number: 12
