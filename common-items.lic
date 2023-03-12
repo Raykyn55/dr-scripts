@@ -81,6 +81,7 @@ module DRCI
     /^You stop as you realize the .* is not yours/,
     /^You can't reach that from here/, # on a mount like a flying carpet
     /^You don't seem to be able to move/,
+    /^You should untie/,
     /^Get what/,
     /^I could not/,
     /^What were you/,
