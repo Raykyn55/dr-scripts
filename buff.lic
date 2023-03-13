@@ -9,6 +9,7 @@ class Waggle
     arg_definitions = [
       [
         { name: 'set', regex: /(set=(\w+))/, optional: true, description: 'list of defined spell sets' },
+        { name: 'charge', regex: /charge/i, optional: true, description: 'Max out your elemental charge by summoning admittances' },
         { name: 'list', regex: /list/, optional: true, description: 'list of defined spell sets' },
         { name: 'spells', regex: /\w+/, optional: true, description: 'Spell list to use, otherwise default' },
         { name: 'force', regex: /force/i, optional: true, description: 'Recast spells even if currently active' },
@@ -40,7 +41,7 @@ class Waggle
 
     unless settings.waggle_sets[setname]
       DRC.message("No waggle set found for name: #{setname}")
-      exit
+      exit unless args.charge
     end
 
     if args.force
@@ -55,6 +56,14 @@ class Waggle
       end
     else
       DRCA.do_buffs(settings, setname)
+    end
+
+    if DRStats.warrior_mage? && (args.charge || settings.buff_max_elemental_charge)
+      unless /You have reached the limits/i =~ DRC.bput("Pathway sense", /^You have reached the limits/, /^Your body is aligned with the Elemental Plane/)
+        while /bigger charge/i =~ DRC.bput("summon admittance", /bigger charge/, /reached your limit/)
+          waitrt?
+        end
+      end
     end
   end
 end
