@@ -812,7 +812,7 @@ class WorkOrder
     while volume < (item['volume'] * quantity)
       if DRCI.get_item?("#{type} #{base}", @bag)
         # fput('combine')
-        if /too large/ =~ DRC.bput("combine", /^You combine/, /^You must be holding both substances/, /^That .* is too large to add more to/, /The resulting stack of .*would be too large and unwieldy/)
+        if /too large/ =~ DRC.bput("combine", /^You combine/, /^You must be holding both substances/, /^That .* is too large to add more to/, /^The resulting stack of .*would be too large and unwieldy/)
           # here we're stowing the first piece we had, which was too small
           # The problem we can run into is with an order over half the size of a fresh deed,
           # but we have two stacks which are both over half (can't combine) while neither are sufficient size
@@ -825,7 +825,7 @@ class WorkOrder
       if volume < (item['volume'] * quantity)
         if redeem_deed(type, base)
           if [DRC.right_hand, DRC.left_hand].compact.size > 1
-            if /too large/ =~ DRC.bput("combine", /^You combine/, /^You must be holding both substances/, /^That .* is too large to add more to/, /The resulting stack of .*would be too large and unwieldy/)
+            if /too large/ =~ DRC.bput("combine", /^You combine/, /^You must be holding both substances/, /^That .* is too large to add more to/, /^The resulting stack of .*would be too large and unwieldy/)
               # here we're stowing the first piece we had, which was too small
               # The issue is when redeeming a new deed, it's likely to be a full stack
               # so we want to just use the full stack, and we'll try combining them next time.
