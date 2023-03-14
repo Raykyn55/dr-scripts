@@ -23,7 +23,7 @@ class CleanLumber
     @self_repair = @settings.workorders_repair_own_tools || @settings.mine_repair_own_tools
     @stack       = args.stack ? args.stack.to_i : 45
     @saw         = @settings.shaping_tools.find { |tool| tool =~ /.*saw/ }
-    @drawknife   = @settings.shaping_tools.find { |tool| tool =~ /.*drawknife/}
+    @drawknife   = @settings.shaping_tools.find { |tool| tool =~ /.*drawknife/ }
 
     unless args.table_saw
       unless @saw && @drawknife
@@ -64,7 +64,7 @@ class CleanLumber
         return process_size(args, size)
       end
     end
-    true 
+    true
   end
 
   def cut_to_lumber(args, size)
