@@ -944,7 +944,7 @@ class WorkOrder
     DRCC.get_crafting_item("alchemy logbook", @bag, @bag_items, @belt)
     quantity.times do
       DRCI.get_item("#{mod}#{name}", @bag)
-      unless /You notate the/ =~ DRC.bput("bundle my #{name} with my logbook", /^You notate the/, /^The workorder requires/)
+      unless /You notate the/ =~ DRC.bput("bundle my #{name} with my logbook", /^You notate the/, /^Th(at|e|is) (work order|isn\'t the correct) (has expired|requires items|type of item)/, /^You notice the work ?order/)
         DRCI.dispose_trash(name, @settings.worn_trashcan, @settings.worn_trashcan_verb)
       end
     end
