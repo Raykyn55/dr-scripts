@@ -5,7 +5,6 @@
 custom_require.call(%w[common common-arcana common-items common-crafting common-money common-travel])
 
 class CleanLumber
-
   def initialize
     arg_definitions = [
       [
@@ -13,19 +12,19 @@ class CleanLumber
         { name: 'source', regex: /\w+/, description: 'container' },
         { name: 'storage', regex: /\w+/, description: 'container to put lumber in' },
         { name: 'table_saw', regex: /^table_saw/, optional: true, description: 'Use table saw' },
-        { name: 'stack', regex: /\d+/, optional: true, description: 'Optional stack size'}
+        { name: 'stack', regex: /\d+/, optional: true, description: 'Optional stack size' }
       ]
     ]
-    args = parse_args(arg_definitions)
-    @settings = get_settings
-    @bag = @settings.crafting_container
-    @bag_items = @settings.crafting_items_in_container
-    @belt = @settings.engineering_belt
+    args         = parse_args(arg_definitions)
+    @settings    = get_settings
+    @bag         = @settings.crafting_container
+    @bag_items   = @settings.crafting_items_in_container
+    @belt        = @settings.engineering_belt
     @self_repair = @settings.workorders_repair_own_tools || @settings.mine_repair_own_tools
-    @stack = args.stack ? args.stack.to_i : 45
-    @saw = @settings.shaping_tools.find { |tool| tool =~ /.*saw/ }
-    @drawknife = @settings.shaping_tools.find { |tool| tool =~ /.*drawknife/}
-   
+    @stack       = args.stack ? args.stack.to_i : 45
+    @saw         = @settings.shaping_tools.find { |tool| tool =~ /.*saw/ }
+    @drawknife   = @settings.shaping_tools.find { |tool| tool =~ /.*drawknife/}
+
     unless args.table_saw
       unless @saw && @drawknife
         DRC.message("Must define both saw and drawknife in yaml under shaping_tools")
@@ -36,9 +35,10 @@ class CleanLumber
       DRCC.get_crafting_item(@saw, @bag, @bag_items, @belt)
     end
 
-    %w[stick log branch limb deed].each do |size| 
+    %w[stick log branch limb deed].each do |size|
       loop do
         break unless process_size(args, size)
+
         cut_to_lumber(args, size)
       end
     end
