@@ -895,7 +895,7 @@ class WorkOrder
     [DRC.right_hand, DRC.left_hand].compact.each { |thing| DRCI.put_away_item?(thing, @bag) }
     500.times do
       find_npc(npc_rooms, npc_last_name)
-      DRCC.get_crafting_item("#{logbook} logbook", @bag, @bag_items, @belt)
+      DRCC.get_crafting_item("#{logbook} logbook", @bag, @bag_items, @belt) unless DRCI.in_hands?('logbook')
       case DRC.bput("ask #{npc} for #{diff} #{discipline} work", '^To whom', 'order for .* I need \d+ ', 'order for .* I need \d+ stacks \(5 uses each\) of .* quality', 'You realize you have items bundled with the logbook', 'You want to ask about shadowlings')
       when 'You want to ask about shadowlings'
         pause 10
