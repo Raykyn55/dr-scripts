@@ -202,6 +202,8 @@ class Burgle
 
     DRC.wait_for_script_to_complete('buff', ['burgle']) if @settings.waggle_sets['burgle']
 
+    DRC.bput('speculate luck', '^You focus your mind on the world around you', '^You are already focusing on the world around you.', '^Your pattern-matching skills are still exhausted') if DRStats.trader? && DRStats.circle >= 65
+
     DRC.fix_standing
     #ensure you're in hiding or invis before starting
     if !invisible?
