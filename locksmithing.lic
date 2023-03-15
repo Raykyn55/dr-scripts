@@ -40,7 +40,7 @@ class Locksmithing
   end
 
   def pick_once
-    exit if checkright =~ /bow|sling/
+    exit if checkright =~ /bow|sling|arbalest/
     if checkright && checkleft
       temp = checkleft
       DRCI.lower_item?(temp)
