@@ -67,7 +67,7 @@ class Locksmithing
         DRCI.put_away_item?(box, @consumable_container) if DRCI.in_hands?(box)
       end
     end
-    
+
     return if @once_picked_twice_shy
     return unless @daily_trainers
 
@@ -96,7 +96,7 @@ class Locksmithing
       when /(you should close)|(isn't locked)/
         DRC.bput("close my #{trainer}", 'You close', 'already closed', "You can't close that")
         DRC.bput("lock my #{trainer}", 'You quickly lock', 'already locked')
-      when /it opens/        
+      when /it opens/
         @once_picked_twice_shy = @pick_once
         DRC.bput("close my #{trainer}", 'You close', 'already closed', "You can't close that")
         DRC.bput("lock my #{trainer}", 'You quickly lock', 'already locked')
