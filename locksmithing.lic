@@ -85,8 +85,7 @@ class Locksmithing
 
   def pick_box(trainer)
     while (DRSkill.getxp('Locksmithing') < 34 && DRC.right_hand)
-      if @pick_once
-        DRC.retreat
+      if @pick_once && DRC.retreat
         fput 'engage'
       end
       case DRC.bput("pick my #{trainer}", 'Maybe you should close', 'not making any progress', "why bother", "it opens.", "isn't locked", 'The lock feels warm', 'The lock looks weak', 'Pick what', 'You need some type of tool to pick', "But you aren't holding")
@@ -102,16 +101,16 @@ class Locksmithing
         DRC.bput("lock my #{trainer}", 'You quickly lock', 'already locked')
       when /The lock feels warm/
         DRC.message('Charges Burned, moving on.')
+        break
       when /The lock looks weak/
-        case DRC.bput("study my #{trainer}", /0 more times/, /risk breaking the lock/, 'Study what')
-        when /0 more times/
-          DRCI.dispose_trash(trainer, @worn_trashcan, @worn_trashcan_verb)
-        end
+        DRCI.dispose_trash(trainer, @worn_trashcan, @worn_trashcan_verb)
+        break
       when /But you aren't holding/
         DRC.message("Description: '#{trainer}' may not be specific enough or is in a wrong container - something is interfering.")
-        exit
+        break
       when /why bother/
         DRC.message("The #{trainer} is not a valid option but shares a noun - move it out of your burgle bag to avoid hangups.")
+        break
       end
       break if @once_picked_twice_shy
     end
