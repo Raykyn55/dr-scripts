@@ -17,7 +17,7 @@ class Locksmithing
     @equipment_manager      = EquipmentManager.new(settings)
     @daily_trainers         = settings.training_box_list
     @worn_lockbox           = settings.training_boxes_are_worn
-    @consumable_lockboxes   = settings.consumable_lockbox_list || ['jewelry box', 'keepsake box']
+    @consumable_lockboxes   = settings.consumable_lockbox_list
     @liveboxes              = settings.pick_live_boxes
     @consumable_container   = settings.burgle_settings['loot_container']
     @use_lockpick_ring      = settings.use_lockpick_ring
