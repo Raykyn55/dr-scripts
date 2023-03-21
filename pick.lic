@@ -158,6 +158,7 @@ class Pick
       setup_flags
       open_containers
       check_for_boxes
+      do_buffs
       remove_hindering_gear
       crack_boxes
       stop_buffs
@@ -245,6 +246,7 @@ class Pick
     Flags.add('glance-no-locks', 'It looks like there are no locks left on')
     Flags.add('tip-offered', /#{@player.capitalize} offers you a tip/) if @player
     Flags.add('box-offered', /#{@player.capitalize} offers you .* ((?:brass|copper|deobar|driftwood|iron|ironwood|mahogany|oaken|pine|steel|wooden) (?:box|caddy|casket|chest|coffer|crate|skippet|strongbox|trunk))/) if @player
+    Flags.add('loot-pouch-full', /There's no room for loot/)
   end
 
   def pickfor_loop
@@ -302,8 +304,10 @@ class Pick
     @boxes_by_bag.each do |source, boxes|
       boxes.each do |box_noun|
         break if stop_picking?
-
-        do_buffs
+        if Flags['loot-pouch-full']
+          DRC.bput("fill my #{@settings.gem_pouch_adjective} #{@settings.gem_pouch_noun} with my #{@settings.autoloot_container}", 'You fill your', 'You open your', 'What were you referring to', /any gems/, /too full to fit/)
+          Flags.reset('loot-pouch-full')
+        end
 
         DRCI.get_item?(box_noun, source)
         balance_lockpick_container
@@ -314,6 +318,7 @@ class Pick
     end
 
     DRC.fix_standing
+    DRC.bput("fill my #{@settings.gem_pouch_adjective} #{@settings.gem_pouch_noun} with my #{@settings.autoloot_container}", 'You fill your', 'You open your', 'What were you referring to', /any gems/, /too full to fit/) if @settings.autoloot_gems
     @equipment_manager.wear_items(@removed_items)
   end
 
@@ -924,7 +929,7 @@ class Pick
     when 'Roundtime'
       echo "Harvested item: #{DRC.left_hand} - trap part? #{@trap_parts.include?(DRC.left_hand)}" if @debug
 
-      DRCI.put_away_item?(DRC.left_hand, @component_container) if @component_container
+      DRCI.put_away_item?(DRC.left_hand, @component_container) if @component_container && DRC.left_hand
       DRCI.dispose_trash(DRC.left_hand, @worn_trashcan, @worn_trashcan_verb) if @trap_parts.include?(DRC.left_hand)
     end
   end
