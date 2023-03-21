@@ -304,6 +304,7 @@ class Pick
     @boxes_by_bag.each do |source, boxes|
       boxes.each do |box_noun|
         break if stop_picking?
+
         if Flags['loot-pouch-full']
           DRC.bput("fill my #{@settings.gem_pouch_adjective} #{@settings.gem_pouch_noun} with my #{@settings.autoloot_container}", 'You fill your', 'You open your', 'What were you referring to', /any gems/, /too full to fit/)
           Flags.reset('loot-pouch-full')
