@@ -928,18 +928,18 @@ class Pick
       DRCI.dispose_trash(DRC.left_hand, @worn_trashcan, @worn_trashcan_verb) if @trap_parts.include?(DRC.left_hand)
     end
   end
-end
 
-before_dying do
-  DRCI.lift?(@@stool, true) if @@stool
-  Flags.delete('disarm-trap-type')
-  Flags.delete('disarm-shift')
-  Flags.delete('more-traps')
-  Flags.delete('more-locks')
-  Flags.delete('glance-no-traps')
-  Flags.delete('glance-no-locks')
-  Flags.delete('box-offered')
-  Flags.delete('tip-offered')
+  before_dying do
+    DRCI.lift?(@@stool, true) if @@stool
+    Flags.delete('disarm-trap-type')
+    Flags.delete('disarm-shift')
+    Flags.delete('more-traps')
+    Flags.delete('more-locks')
+    Flags.delete('glance-no-traps')
+    Flags.delete('glance-no-locks')
+    Flags.delete('box-offered')
+    Flags.delete('tip-offered')
+  end
 end
 
 Pick.new
