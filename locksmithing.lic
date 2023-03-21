@@ -84,7 +84,7 @@ class Locksmithing
   end
 
   def pick_box(trainer)
-    while (DRSkill.getxp('Locksmithing') < 34 && DRC.right_hand)
+    while (DRSkill.getxp('Locksmithing') < 34 && DRCI.in_hands?(trainer))
       if @pick_once && DRC.retreat
         fput 'engage'
       end
