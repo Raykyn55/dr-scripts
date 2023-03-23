@@ -5,8 +5,12 @@ totalL,totalK,totalD = [0,0,0]
 needed = []
 DRCI.stow_hands
 
+def check_herb(herb)
+    /You see nothing unusual/ =~ DRC.bput("look my #{herb}", /^You see nothing unusual/, /^I could not find what you were referring to/)
+end
+
 settings.herbs.each do |herb|
-    next if DRCI.exists?(herb['name'])
+    next if check_herb(herb['name'])
     needed << herb['name']
     if herb['location'] == 'Riverhaven'
         totalL += herb['price']
