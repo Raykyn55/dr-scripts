@@ -29,7 +29,6 @@ class Locksmithing
     @worn_trashcan_verb     = settings.worn_trashcan_verb
     @pick_once              = args.once
 
-
     pick_once if @pick_once
     live_boxes if @liveboxes
     @consumable_lockboxes, @daily_trainers = @daily_trainers, @consumable_lockboxes if @prioritize_consumables
