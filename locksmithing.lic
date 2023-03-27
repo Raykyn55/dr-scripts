@@ -16,8 +16,9 @@ class Locksmithing
     settings                = get_settings
     @equipment_manager      = EquipmentManager.new(settings)
     @daily_trainers         = settings.training_box_list
-    @worn_lockbox           = settings.training_boxes_are_worn
+    @worn_lockbox           = settings.picking_worn_lockbox
     @consumable_lockboxes   = settings.consumable_lockbox_list
+    @prioritize_consumables = settings.prioritize_consumable_lockboxes
     @liveboxes              = settings.pick_live_boxes
     @consumable_container   = settings.burgle_settings['loot_container']
     @use_lockpick_ring      = settings.use_lockpick_ring
@@ -30,12 +31,14 @@ class Locksmithing
 
     pick_once if @pick_once
     live_boxes if @liveboxes
+    @consumable_lockboxes, @daily_trainers = @daily_trainers, @consumable_lockboxes if @prioritize_consumables
 
     start_script('performance', ['noclean']) unless Script.running?('performance')
-    pause 3
+    pause settings.performance_pause || 3
     @equipment_manager.empty_hands
     DRCI.get_item_if_not_held?('lockpick', @lockpick_container) unless @use_lockpick_ring
-    lock_box_trainers
+    lock_box_trainers(@daily_trainers)
+    lock_box_trainers(@consumable_lockboxes)
     DRCI.put_away_item?('lockpick', @lockpick_container) unless @use_lockpick_ring
   end
 
@@ -45,41 +48,41 @@ class Locksmithing
       temp = checkleft
       DRCI.lower_item?(temp)
     end
-    lock_box_trainers
+    lock_box_trainers(@consumable_lockboxes)
     DRCI.lift? if temp
     exit
   end
 
   def live_boxes
-    DRCT.walk_to(@safe_room)
     DRC.wait_for_script_to_complete('pick') if @liveboxes
     DRC.wait_for_script_to_complete('sell-loot') if @sell_loot
+    DRCT.walk_to(@safe_room) if @sell_loot
     exit unless DRSkill.getxp('Locksmithing') < 34
-    DRCT.walk_to(@safe_room)
   end
 
-  def lock_box_trainers
-    @consumable_lockboxes.each do |box|
-      break if @once_picked_twice_shy
-
-      while DRSkill.getxp('Locksmithing') < 34 && !@once_picked_twice_shy && DRCI.get_item?(box, @consumable_container)
-        pick_box(box)
-        DRCI.put_away_item?(box, @consumable_container) if DRCI.in_hands?(box)
-      end
-    end
-
-    return if @once_picked_twice_shy
-    return unless @daily_trainers
-
-    @daily_trainers.each do |box|
+  def lock_box_trainers(boxes)
+    boxes.each do |box|
       break if @once_picked_twice_shy
 
       @ords = $ORDINALS.dup
-      while DRSkill.getxp('Locksmithing') < 34 && !@once_picked_twice_shy && (DRCI.remove_item?(box) || DRCI.get_item?(box))
+      while DRSkill.getxp('Locksmithing') < 34 && !@once_picked_twice_shy && get_box(box)
         pick_box(box)
-        DRCI.wear_item?(box) if @worn_lockbox
-        DRCI.put_away_item?(box, @bag) if DRCI.in_hands?(box)
+        DRCI.wear_item?(box) if @worn_lockbox && get_settings.training_box_list.include?(box)
+        DRCI.put_away_item?(box, @consumable_container) if DRCI.in_hands?(box)
       end
+    end
+  end
+
+  def get_box(box)
+    if get_settings.training_box_list.include?(box)
+      box = "#{@ords.shift} #{box}"
+      if @worn_lockbox
+        DRCI.remove_item?(box)
+      else
+        DRCI.get_item?(box)
+      end
+    else
+      DRCI.get_item?(box, @consumable_container)
     end
   end
 
