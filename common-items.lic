@@ -1185,4 +1185,58 @@ module DRCI
       fill_gem_pouch_with_container(gem_pouch_adjective, gem_pouch_noun, source_container, full_pouch_container, spare_gem_pouch_container, should_tie_gem_pouches)
     end
   end
+
+  #########################################
+  # LIGHTERS AND LIGHTING THINGS ON FIRE
+  #########################################
+
+  # Method must be run with item to be lit in hands
+  # Method ends with clean hands, or lit item in your hand.
+  # Any script calling this method needs to call script 'equipmanager' to load it's methods and your settings
+  # blade arg is the EquipmentManager formatted version of a weapon, as defined in gear
+  # fetched with EquipmentManager.new.item_by_desc(blade)
+  # lighter is a hash from yaml setting:
+  #   lighter_info:
+  #     name: lava draked
+  #     container: smoking jacket
+  def light_item_on_fire?(item, blade, lighter, item_container = nil)
+    equipmanager = EquipmentManager.new
+    if DRStats.warrior_mage? && /prepared/ =~ DRC.bput("prep c b t", /^You are now prepared/) && ready_set_light("gesture #{item}")
+      return true
+    elsif lighter['name'] && DRCI.get_item?(lighter['name'], lighter['container']) && ready_set_light("point my #{lighter['name']} at #{item}")
+      return DRCI.put_away_item?(lighter['name'], lighter['container'])
+    elsif lighter['name']
+      DRCI.put_away_item?(lighter['name'], lighter['container']) if DRCI.in_hands?(lighter['name'])
+      DRC.message("#{lighter['name']} appears to be awol or non-functional, going to try flint and steel")
+    end
+
+    light_with_flint?(item, blade, equipmanager, item_container)
+  end
+
+  def light_with_flint?(item, blade, equipmanager, item_container = nil)
+    stow = item_container || true
+    DRCI.lower_item?(DRC.right_hand)
+    if !DRCI.get_item?("flint")
+      DRC.message("Missing flint, scoot to your local shop and pick some up!")
+    elsif !equipmanager.get_item?(blade)
+      if blade.name
+        DRC.message("Missing #{blade.name}, find it.")
+      else
+        DRC.message("#{blade} needs to be defined in your gear setting in your yaml")
+      end
+    elsif !ready_set_light("light #{item} with my flint")
+      DRC.message("#{item} didn't light, reasons unknown, submit issue if you feel this is in error")
+    else
+      stow = false
+    end
+
+    DRCI.stow_item?('flint') if DRCI.in_hands?('flint')
+    equipmanager.return_held_gear
+    DRCI.lift?(item, stow) # If we are successful, simply lifts the item. otherwise, stows it accordingly
+    !stow # returns our result
+  end
+
+  def ready_set_light(command)
+    Regexp.new(@@light_success_patterns.join('|')) =~ DRC.bput(command, { 'timeout' => 5, 'suppress_no_match' => true }, @@light_success_patterns)
+  end
 end
