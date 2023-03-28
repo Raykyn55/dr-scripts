@@ -48,12 +48,13 @@ class Smoker
     ]
 
     args            = parse_args(arg_definitions)
-    @smoke_settings = get_settings.smoke
+    settings        = get_settings
+    @smoke_settings = settings.smoke
     @equipmanager   = EquipmentManager.new
     images          = args.image || @smoke_settings['smoke_images'] || UserVars.smoke_images_known
     @bag            = @smoke_settings['container']
     @pipe           = @smoke_settings['pipe']
-    @lighter        = @smoke_settings['lighter']
+    @lighter        = settings.lighter_info
     @blade          = @equipmanager.items.find { |gear| gear.short_regex =~ @smoke_settings['blade'] || gear.name =~ /\b#{@smoke_settings['blade']}\b/i }
     @cigar          = args.cigar
     @time_between   = @smoke_settings['time_between_exhales'] || 1
@@ -182,7 +183,7 @@ class Smoker
       DRCI.get_item?('tobacco', @bag)
       DRCI.put_away_item?('tobacco', @pipe)
     end
-    light_tobacco("tobacco in pipe")
+    DRCI.light_item_on_fire?("tobacco in pipe", @blade, @lighter, @bag)
   end
 
   def quick_light(smoker)
@@ -192,34 +193,7 @@ class Smoker
       load_pipe
     when /cigar/
       exit unless DRCI.get_item_if_not_held?(smoker, @bag)
-      light_tobacco(smoker)
-    end
-  end
-
-  def light_tobacco(target) # loaded pipe or cigar in hand, ends with either in hand, ready to rip
-    if DRStats.warrior_mage?
-      DRC.bput("prep c b t", /^You are now prepared/)
-      DRC.bput("gesture #{target}", /^You touch/, /^That's already burning/)
-    elsif @lighter
-      unless DRCI.get_item?(@lighter)
-        DRC.message("#{@lighter} appears to be awol, going to try flint and steel")
-        @lighter = false
-        return light_tobacco(target)
-      end
-      DRC.bput("point my #{@lighter} at #{target}", /making the .* quickly catch fire/, /^That's already burning/)
-      DRCI.put_away_item?(@lighter, @bag)
-    else # flint
-      unless DRCI.get_item?("flint")
-        DRC.message("Missing flint, scoot to your local shop and pick some up, every adventurer should have flint and steel")
-        DRCI.put_away_item?(DRC.right_hand, @bag)
-        exit
-      end
-      DRCI.lower_item?(target.split.last)
-      @equipmanager.get_item?(@blade)
-      DRC.bput("light #{target} with my flint", /^Roundtime/, /^That's already burning/)
-      DRCI.stow_item?("flint")
-      @equipmanager.return_held_gear
-      DRCI.lift?
+      DRCI.light_item_on_fire?(smoker, @blade, @lighter, @bag)
     end
   end
 
