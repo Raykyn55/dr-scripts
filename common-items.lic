@@ -71,7 +71,7 @@ module DRCI
     /^You are already holding/,
     /^You fade in for a moment as you/,
     /^You carefully lift/,
-    /^You carefully remove/ # get from bundle
+    /^You carefully remove/
   ]
 
   @@get_item_failure_patterns = [
@@ -188,7 +188,7 @@ module DRCI
 
   @@put_away_item_success_patterns = [
     /^You put your .* in/,
-    /^You carefully fit/, # place in bundle
+    /^You carefully fit/,
     /^You hold out/,
     /^You tuck/,
     /^You open your pouch and put/,
@@ -380,6 +380,14 @@ module DRCI
     /^Your offer to .* has expired/,
     /^You may only have one outstanding offer at a time/,
     /^What is it you're trying to give/
+  ]
+
+  @@light_success_patterns = [
+    /^You touch/,
+    /^That('s| is) already burning/,
+    /bursts into flames/,
+    /quickly catch fire/,
+    /^But .* is already lit/
   ]
 
   #########################################
