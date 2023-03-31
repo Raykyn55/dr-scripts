@@ -998,6 +998,9 @@ repair_timer:
 repair_withdrawal_amount:
   description: Amount you want on hand for repairs
   example: 10000
+  referenced_by:
+    - crossing-repair
+    - repair
 
 safe_room:
   description: Your specified safe room via roomnumber.
