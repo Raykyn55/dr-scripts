@@ -22,6 +22,7 @@ class MiningBuddy
     deeds_data = get_data('crafting').deeds[@hometown]
     @deeds_room = deeds_data['room']
     @deeds_number = deeds_data['medium_number']
+    @scan_before_and_after = settings.mining_buddy_scan_before_and_after
     @mine_repair_own_tools = settings.mine_repair_own_tools
     DRC.message("#{@areas}:#{@vein_list}") if UserVars.mining_debug
 
@@ -64,7 +65,19 @@ class MiningBuddy
     check_repair(tools)
     DRC.wait_for_script_to_complete('buff', ['mining-buddy'])
     DRC.bput('speculate luck', '^You focus your mind on the world around you', '^You are already focusing on the world around you.', '^Your pattern-matching skills are still exhausted') if DRStats.trader? && DRStats.circle >= 65
-    @areas.each { |area_name| mine_rooms(@area_list[area_name]) }
+    if @scan_before_and_after
+      # we'll check every room first, mining anything juicy
+      @mine_every_room = false
+      @areas.each { |area_name| mine_rooms(@area_list[area_name]) }
+      # now we'll mine every room out
+      @mine_every_room = true
+      @areas.each { |area_name| mine_rooms(@area_list[area_name]) }
+      # and one more check to see if anything popped up
+      @mine_every_room = false
+      @areas.each { |area_name| mine_rooms(@area_list[area_name]) }
+    else
+      @areas.each { |area_name| mine_rooms(@area_list[area_name]) }
+    end
   end
 
   def buy_deed_packet
@@ -97,7 +110,7 @@ class MiningBuddy
     DRC.message("Repairing #{tools_to_be_repaired.join(" and ")}")
 
     # with our list of tools requiring repair, we'll drop each off at the repair shop
-    DRC.wait_for_script_to_complete('repair', tools_array)
+    DRC.wait_for_script_to_complete('repair', tools_to_be_repaired)
   end
 
   def mine_rooms(rooms)
