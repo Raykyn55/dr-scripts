@@ -306,7 +306,7 @@ class Pick
         break if stop_picking?
 
         if Flags['loot-pouch-full']
-          DRCI.fill_gem_pouch_with_container(@settings.gem_pouch_adjective, @settings.gem_pouch_noun, @settings.autoloot_container, @settings.full_pouch_container, @settings.spare_gem_pouch_container, @settings.should_tie_gem_pouches)
+          DRCI.fill_gem_pouch_with_container(@settings.gem_pouch_adjective, @settings.gem_pouch_noun, @settings.autoloot_container, @settings.full_pouch_container, @settings.spare_gem_pouch_container, @settings.tie_gem_pouches)
           Flags.reset('loot-pouch-full')
         end
 
@@ -319,7 +319,7 @@ class Pick
     end
 
     DRC.fix_standing
-    DRCI.fill_gem_pouch_with_container(@settings.gem_pouch_adjective, @settings.gem_pouch_noun, @settings.autoloot_container, @settings.full_pouch_container, @settings.spare_gem_pouch_container, @settings.should_tie_gem_pouches) if @settings.autoloot_gems
+    DRCI.fill_gem_pouch_with_container(@settings.gem_pouch_adjective, @settings.gem_pouch_noun, @settings.autoloot_container, @settings.full_pouch_container, @settings.spare_gem_pouch_container, @settings.tie_gem_pouches) if @settings.autoloot_gems
     @equipment_manager.wear_items(@removed_items)
   end
 
