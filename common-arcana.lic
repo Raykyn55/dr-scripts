@@ -134,7 +134,7 @@ module DRCA
 
     result = DRC.bput("Khri #{should_delay ? 'Delay ' : ''}#{needed_abilities.join(' ')}", get_data('spells').khri_preps)
     waitrt?
-    DRC.fix_standing
+    DRC.fix_standing if kneel
 
     return ['Your mind and body are willing', 'Your body is willing', 'You have not recovered'].none?(result)
   end
