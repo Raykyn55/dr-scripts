@@ -353,13 +353,13 @@ stock:
     stock-value: 62
   backing:
     stock-value: 125
-  rod:
+  bobcat rod:
     stock-value: 312
-  bead:
+  heron bead:
     stock-value: 187
-  runestone:
+  basic runestone:
     stock-value: 187
-  sphere:
+  small sphere:
     stock-value: 150
   wand:
     stock-value: 125
@@ -2405,7 +2405,7 @@ recipe_parts:
     Fang Cove:
       part-room: 9118
       part-number:
-  leather strip:
+  leather strips:
     Crossing:
       part-room: 8864
       part-number:
@@ -2458,7 +2458,7 @@ recipe_parts:
     Fang Cove:
       part-room: 14784
       part-number:
-  rod:
+  bobcat rod:
     Crossing:
       part-room: 14753
       part-number:
@@ -2474,7 +2474,7 @@ recipe_parts:
     Fang Cove:
       part-room: 14784
       part-number:
-  bead:
+  heron bead:
     Crossing:
       part-room: 14753
       part-number:
@@ -2490,7 +2490,7 @@ recipe_parts:
     Fang Cove:
       part-room: 14784
       part-number:
-  runestone:
+  basic runestone:
     Crossing:
       part-room: 14753
       part-number:
@@ -2506,7 +2506,7 @@ recipe_parts:
     Fang Cove:
       part-room: 14784
       part-number:
-  sphere:
+  small sphere:
     Crossing:
       part-room: 14753
       part-number:
