@@ -7655,7 +7655,7 @@ artificing:
     work_order: true
     part:
     - congruence sigil-scroll
-    - rod
+    - bobcat rod
   - name: a celestial beacon
     noun: gem
     chapter: 2
@@ -8226,7 +8226,7 @@ artificing:
     part:
     - induction sigil-scroll
     - evolution sigil-scroll
-    - rod
+    - bobcat rod
   - name: an abstract burin
     noun: burin
     chapter: 5
@@ -8252,7 +8252,7 @@ artificing:
     - abolition sigil-scroll
     - paradox sigil-scroll
     - nurture sigil-scroll
-    - rod
+    - bobcat rod
   - name: a precise burin
     noun: burin
     chapter: 5
@@ -8278,7 +8278,7 @@ artificing:
     - rarefaction sigil-scroll
     - antipode sigil-scroll
     - metamorphosis sigil-scroll
-    - rod
+    - bobcat rod
   # Artificing Chapter 6 recipes
   - name: a bubble wand
     noun: wand
