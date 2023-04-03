@@ -403,17 +403,18 @@ class WorkOrder
     item['part'].each do |part|
       buy_material_singles(info, materials_info[part], quantity, part)
     end
+    base_item = item['part'].find { |part| part.match(/sphere|rod|totem|ring|ingot|runestone|pole|burin|wand|pebble/) }
     DRCC.fount(info['tool-room'], 1, info['fount'], quantity, @bag, @bag_items, @belt)
     DRCI.put_away_item?("fount", @bag)
-    # Start crafting #
+
     DRCC.find_enchanting_room(@hometown, @work_room)
     quantity.times do
       if @skip_logging
-        DRC.wait_for_script_to_complete('enchant', [item['chapter'], item['name'], item['noun']])
+        DRC.wait_for_script_to_complete('enchant', [item['chapter'], item['name'], item['noun'], base_item])
         DRCI.dispose_trash(item['noun'], @settings.worn_trashcan, @settings.worn_trashcan_verb)
         break if training_done?(book, item['part'], base)
       else
-        DRC.wait_for_script_to_complete('enchant', [item['chapter'], item['name'], item['noun']])
+        DRC.wait_for_script_to_complete('enchant', [item['chapter'], item['name'], item['noun'], base_item])
         DRCC.logbook_item('enchanting', item['noun'], @bag)
       end
     end
