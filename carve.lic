@@ -12,18 +12,18 @@ class Carve
         { name: 'recipe_name', regex: /^[A-z\s\-]+$/i, display: 'Recipe Name', variable: true, description: 'Name of the recipe, wrap in double quotes if this is multiple words.' },
         { name: 'material', regex: /\w+/i, variable: true, description: 'Name of material to be used' },
         { name: 'noun', regex: /\w+/i, variable: true },
-        { name: 'skip', regex: /skip/i, optional: true, description: 'Optional setting to skip restocking consumables if low (oil)'}
+        { name: 'skip', regex: /skip/i, optional: true, description: 'Optional setting to skip restocking consumables if low (oil)' }
       ],
       [
         { name: 'instructions', regex: /instructions/i },
-        { name: 'material', regex: /\w+/i, display: 'Material', regex: /\w+/i, description: 'Name of material to be used'},
+        { name: 'material', regex: /\w+/i, display: 'Material', description: 'Name of material to be used' },
         { name: 'noun', regex: /\w+/i, description: 'Noun of item to resume.' },
-        { name: 'skip', regex: /skip/i, optional: true, description: 'Optional setting to skip restocking consumables if low (oil)'}
+        { name: 'skip', regex: /skip/i, optional: true, description: 'Optional setting to skip restocking consumables if low (oil)' }
       ],
       [
         { name: 'resume', regex: /resume/i },
         { name: 'noun', regex: /\w+/i, variable: true, description: 'Noun of item to resume.' },
-        { name: 'skip', regex: /skip/i, optional: true, description: 'Optional setting to skip restocking consumables if low (oil)'}
+        { name: 'skip', regex: /skip/i, optional: true, description: 'Optional setting to skip restocking consumables if low (oil)' }
       ]
     ]
 
@@ -45,7 +45,7 @@ class Carve
     Flags.add('carve-done', /Applying the final touches/)
 
     DRC.wait_for_script_to_complete('buff', ['carve'])
-    
+
     DRCC.check_consumables('polish', @crafting_data['polish-room'], @crafting_data['polish-number'], @bag, @bag_items, @belt) unless args.skip
 
     carve(prep)
@@ -70,7 +70,7 @@ class Carve
         DRC.bput('study my book', 'Roundtime')
       end
     end
-    if @material && @stone.any? { |mat| mat =~ /#{@material}/i } #stone
+    if @material && @stone.any? { |mat| mat =~ /#{@material}/i }
       @home_tool = 'chisels'
       swap_tool('chisels')
       # Some deeds are <material> deed, some are <size> deed, eg boulder deed
@@ -91,7 +91,7 @@ class Carve
         fput("tap my deed")
         return "cut #{size} with my #{DRC.right_hand}"
       end
-    elsif @material #bone
+    elsif @material # Bone templates
       @home_tool = 'saw'
       swap_tool('saw')
       DRCC.get_crafting_item("#{@material} stack", @bag, @bag_items, @belt)
@@ -105,7 +105,7 @@ class Carve
         long_name = Regexp.last_match(1)
         @home_tool = @stone.any? { |mat| long_name.include?(mat) } ? 'chisels' : 'saw'
         return "analyze #{@noun}"
-      elsif /You tap (.*) on the ground/ =~ DRC.bput("tap #{@noun}", /^You tap (.*) on the ground/, /^What were you referring to/, /^I could not find/)  # tap to find it.
+      elsif /You tap (.*) on the ground/ =~ DRC.bput("tap #{@noun}", /^You tap (.*) on the ground/, /^What were you referring to/, /^I could not find/) # tap to find it.
         long_name = Regexp.last_match(1)
         @home_tool = @stone.any? { |mat| long_name.include?(mat) } ? 'chisels' : 'saw'
         return "analyze #{@noun}"
@@ -171,15 +171,15 @@ class Carve
       assemble_part
       command = DRCI.in_left_hand?(@noun) ? command.sub(@noun, "my #{@noun}") : command
       result = DRC.bput(command,
-                /rough, jagged/, /developed an uneven texture along its surface/, /determine it is no longer level/, /determine.*is uneven/,
-                /You cannot figure out how to do that/, /you see some discolored areas/, /Roundtime/,
-                /You do not see anything that would (prevent|obstruct) carving/, /free of defects that would impede further carving/,
-                /ready for further carving/, /corrected by rubbing the .* with a riffler set/, /corrected by scraping the .* with a rasp/,
-                /angle of cut will improve if scraped with a rasp/, /by applying some polish to/, /This appears to be a type of finished/,
-                /I could not find what/, # missing polish
-                /\[Ingredients can be added/, #missed assemble
-                /^You must study a design in a design codex before proceeding to craft this/,
-                /^Roundtime/)
+                        /rough, jagged/, /developed an uneven texture along its surface/, /determine it is no longer level/, /determine.*is uneven/,
+                        /You cannot figure out how to do that/, /you see some discolored areas/, /Roundtime/,
+                        /You do not see anything that would (prevent|obstruct) carving/, /free of defects that would impede further carving/,
+                        /ready for further carving/, /corrected by rubbing the .* with a riffler set/, /corrected by scraping the .* with a rasp/,
+                        /angle of cut will improve if scraped with a rasp/, /by applying some polish to/, /This appears to be a type of finished/,
+                        /I could not find what/, # missing polish
+                        /\[Ingredients can be added/, # missed assemble
+                        /^You must study a design in a design codex before proceeding to craft this/,
+                        /^Roundtime/)
       echo(result) if UserVars.debug_carve
       case result
       when /You must study a design in a design codex before proceeding to craft this/
@@ -217,6 +217,7 @@ class Carve
 
   def magic_cleanup
     return if @training_spells.empty?
+
     DRC.bput('prepare symbiosis', /^You recall the exact details of the/, /^But you've already prepared/, /^Please don't do that here/)
     DRC.bput('release symbiosis', /^You release/, /^But you haven't prepared/)
     DRC.bput('release spell', /^You let your concentration lapse/, /^You aren't preparing a spell/)
@@ -224,17 +225,15 @@ class Carve
   end
 
   def finish
-    DRC.bput("get #{@noun}", /^You pick up/) unless DRCI.in_left_hand?(@noun)
-    DRCC.stow_crafting_item(DRC.right_hand, @bag, @belt) #stows any tools we're holding, item should be in our left hand always.
+    DRCI.lift? unless DRCI.in_left_hand?(@noun)
+    DRCC.stow_crafting_item(DRC.right_hand, @bag, @belt)
     if @stamp
       swap_tool('stamp')
       DRC.bput("mark my #{@noun} with my stamp", 'carefully hammer the stamp', 'You cannot figure out how to do that', 'too badly damaged')
       DRCC.stow_crafting_item(DRC.right_hand, @bag, @belt)
     end
-    if @home_tool == 'saw'
-      if /You pick up/ =~ DRC.bput("lift stack", /^You pick up/, /^What did you want to try and lift/)
-        DRCC.stow_crafting_item('stack', @bag, @belt)
-      end
+    if @home_tool == 'saw' && DRCI.lift?('stack')
+      DRCC.stow_crafting_item('stack', @bag, @belt)
     else
       2.times do fput("empty feet") end
     end
