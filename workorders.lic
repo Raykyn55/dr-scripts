@@ -340,7 +340,7 @@ class WorkOrder
       end
     end
     dispose_parts(item['part'])
-    dispose_stock_materials(type, base)
+    dispose_stock_materials(type, base) if scrap
   end
 
   def stone_prep(info, materials_info, item, quantity, book, script, _base)
@@ -359,7 +359,7 @@ class WorkOrder
     dispose_parts(item['part'])
   end
 
-  def remedy_prep(info, materials_info, item, quantity, book, _script, base)
+  def remedy_prep(info, materials_info, item, quantity, book, _script, _base)
     @leftovers = buy_remedies(info, materials_info, item, quantity)
     @bag_items << @leftovers
     DRCT.walk_to(@work_room)
@@ -379,7 +379,7 @@ class WorkOrder
     dispose_parts(@leftovers)
   end
 
-  def enchant_prep(info, materials_info, item, quantity, book, _script, base)
+  def enchant_prep(info, materials_info, item, quantity, book, _script, _base)
     quantity += 1 # To account for the poor training ratio (rt:mindstate) in enchanting.
     item['part'].each do |part|
       buy_material_singles(info, materials_info[part], quantity, part)
@@ -659,7 +659,7 @@ class WorkOrder
 
   def dispose_stock_materials(type, base)
     while DRCI.get_item?("#{type} #{base}", @bag)
-      if @workorders_materials['custom'][base] == type || @retain_crafting_materials 
+      if @workorders_materials['custom'][base] == type || @retain_crafting_materials
         deed_item("#{type} #{base}")
       else # otherwise, just using store bought, so dump what we have
         trash_crafting_item("#{type} #{base}")
