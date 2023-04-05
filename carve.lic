@@ -5,15 +5,7 @@
 custom_require.call(%w[common common-arcana common-crafting common-items events])
 
 class Carve
-
   def initialize
-    @settings = get_settings
-    @bag = @settings.crafting_container
-    @bag_items = @settings.crafting_items_in_container
-    @belt = @settings.engineering_belt
-    @stamp = @settings.mark_crafted_goods
-    @cube = @settings.cube_armor_piece
-
     arg_definitions = [
       [
         { name: 'chapter', regex: /\d+/i, description: 'Chapter containing the item.' },
@@ -36,17 +28,23 @@ class Carve
     ]
 
     args = parse_args(arg_definitions)
-
-    @chapter = args.chapter
-    @recipe_name = args.recipe_name
-    @material = args.material
-    @noun = args.noun
-    @crafting_data = get_data('crafting')['carving'][@settings.hometown]
+    @settings        = get_settings
+    @bag             = @settings.crafting_container
+    @bag_items       = @settings.crafting_items_in_container
+    @belt            = @settings.engineering_belt
+    @stamp           = @settings.mark_crafted_goods
+    @cube            = @settings.cube_armor_piece
+    @chapter         = args.chapter
+    @recipe_name     = args.recipe_name
+    @material        = args.material
+    @noun            = args.noun
+    @crafting_data   = get_data('crafting')['carving'][@settings.hometown]
     @training_spells = @settings.crafting_training_spells
-    @stone = ['alabaster', 'granite', 'marble', 'limestone', 'pumice', 'soapstone', 'sandstone', 'quartzite', 'andesite', 'basalt', 'breccia', 'dolomite', 'gabbro', 'jade', 'obsidian', 'onyx', 'schist', 'serpentine', 'travertine', 'senci', 'diamondique', 'felstone', 'fulginode', 'blackwater', 'xenomite', 'belzune', 'anjisis']
-    DRC.wait_for_script_to_complete('buff', ['carve'])
+    @stone           = ['alabaster', 'granite', 'marble', 'limestone', 'pumice', 'soapstone', 'sandstone', 'quartzite', 'andesite', 'basalt', 'breccia', 'dolomite', 'gabbro', 'jade', 'obsidian', 'onyx', 'schist', 'serpentine', 'travertine', 'senci', 'diamondique', 'felstone', 'fulginode', 'blackwater', 'xenomite', 'belzune', 'anjisis']
     Flags.add('carve-assembly', 'another finished wooden (hilt|haft)', 'another finished (long|short) wooden (pole)', 'another finished (long|short) leather (cord)')
     Flags.add('carve-done', /Applying the final touches/)
+
+    DRC.wait_for_script_to_complete('buff', ['carve'])
     
     DRCC.check_consumables('polish', @crafting_data['polish-room'], @crafting_data['polish-number'], @bag, @bag_items, @belt) unless args.skip
 
@@ -118,14 +116,28 @@ class Carve
     end
   end
 
-  def check_hand(x)
-    if DRCI.in_right_hand?(x)
+  def check_hand(item)
+    return if DRCI.in_left_hand?(item)
+
+    if DRCI.in_right_hand?(item)
       DRC.bput('swap', 'You move', 'You have nothing')
     else
       DRC.message('***Please hold the item or material you wish to work on.***')
       magic_cleanup
       exit
     end
+  end
+
+  def codex
+    @design_codex = @settings.design_codex
+    @designs = get_data('recipes')['codex']
+    swap_tool(@design_codex)
+    unless @settings.design_template && (@design_info = @designs.find { |design| design['name'] == @settings.design_template })
+      @design_info = @designs.sample
+    end
+
+    DRC.bput("turn my #{@design_codex.split.last} to page #{DRCC.find_recipe(@design_info['chapter'], @design_info['name'], @design_codex.split.last)}", 'You turn your', 'The .* is already')
+    DRC.bput("study my #{@design_codex.split.last}", 'Roundtime')
   end
 
   def swap_tool(next_tool, skip = false)
@@ -166,9 +178,14 @@ class Carve
                 /angle of cut will improve if scraped with a rasp/, /by applying some polish to/, /This appears to be a type of finished/,
                 /I could not find what/, # missing polish
                 /\[Ingredients can be added/, #missed assemble
+                /^You must study a design in a design codex before proceeding to craft this/,
                 /^Roundtime/)
-      echo(result)
+      echo(result) if UserVars.debug_carve
       case result
+      when /You must study a design in a design codex before proceeding to craft this/
+        codex
+        swap_tool(@home_tool)
+        next
       when /rough, jagged/, /corrected by rubbing the .* with a riffler set/
         waitrt?
         swap_tool('rifflers')
