@@ -340,7 +340,7 @@ class WorkOrder
       end
     end
     dispose_parts(item['part'])
-    dispose_stock_materials(type, base) if scrap
+    dispose_stock_materials(type, base) if scrap || @workorders_materials['custom'][base]
   end
 
   def stone_prep(info, materials_info, item, quantity, book, script, _base)
