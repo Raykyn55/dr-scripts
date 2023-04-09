@@ -21,6 +21,7 @@ class MagicTraining
     training_skills = args.training_skills ? args.training_skills.split(',').map { |skill| skill.strip.downcase.capitalize } : %w[Utility Warding Augmentation Sorcery]
     training_skills += ["Attunement", "Arcana"]
     training_skills.each { |skill| @@mindstate_gains.store(skill,0) }
+    Flags.add('spell-ready', 'You feel fully prepared to cast your spell')
 
     echo "Max training time: #{max_time} seconds"
     echo "Training skills: #{training_skills}"
@@ -65,12 +66,13 @@ class MagicTraining
       spelldata = training_spells[skill]
       before_xp = {}
       gain = {}
+      Flags.reset('spell-ready')
       DRCA.check_discern(spelldata, settings) if spelldata['use_auto_mana']
       DRCA.prepare?(spelldata['abbrev'],spelldata['mana'],spelldata['symbiosis'],spelldata['prep'])
       DRCA.find_charge_invoke_stow(settings.cambrinth, settings.stored_cambrinth, settings.cambrinth_cap, settings.dedicated_camb_use, spelldata['cambrinth'], settings.cambrinth_invoke_exact_amount)
       DRC.collect('rock')
       DRC.kick_pile?
-      waitcastrt?
+      pause 0.1 until Flags['spell-ready']
       training_skills.each { |s| before_xp.store(s,DRSkill.getxp(s)) } #snapshot of mindstates before casting
       DRCA.cast?(spelldata['cast'], spelldata['symbiosis']) # casting our spell
       training_skills.each { |s| gain.store(s,DRSkill.getxp(s) - before_xp[s]) && @@mindstate_gains[s] += gain[s] } # record the change in mindstates for all skills, to capture spell casts that train more than one
@@ -106,6 +108,10 @@ class MagicTraining
     end
     exit
   end
+end
+
+before_dying do
+  Flags.delete('spell-ready')
 end
 
 MagicTraining.new
