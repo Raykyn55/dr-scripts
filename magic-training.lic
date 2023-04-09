@@ -49,7 +49,7 @@ class MagicTraining
                       .select { |skill| training_skills.include?(skill) } # filter to skills you want to train
                       .select { |skill| DRCMM.update_astral_data(training_spells[skill]) } # filter to spells you can cast now
                       .reject { |skill| DRSkill.getxp(skill) > exp_threshold } # filter out skills you don't need to train
-                      .sort_by do |skill| 
+                      .sort_by do |skill|
                         [DRSkill.getxp(skill), DRSkill.getrank(skill)]
     end
 
