@@ -280,6 +280,7 @@ class Pick
     current = accept_box
     loot(current)
     dispose_empty_box(current)
+    DRCI.fill_gem_pouch_with_container(@settings.gem_pouch_adjective, @settings.gem_pouch_noun, @settings.autoloot_container, @settings.full_pouch_container, @settings.spare_gem_pouch_container, @settings.tie_gem_pouches) if @settings.autoloot_gems
     DRC.message("That's the last one! #{@boxes_by_bag.values.flatten.size} boxes picked by #{@player.capitalize}. Don't forget a tip!")
   end
 
@@ -814,6 +815,11 @@ class Pick
     if DRC.bput("open my #{box_noun}", /^In the .* you see .*\./, 'That is already open', 'It is locked') == 'It is locked'
       echo 'Bug: Tried to loot locked box...'
       return
+    end
+
+    if Flags['loot-pouch-full']
+      DRCI.fill_gem_pouch_with_container(@settings.gem_pouch_adjective, @settings.gem_pouch_noun, @settings.autoloot_container, @settings.full_pouch_container, @settings.spare_gem_pouch_container, @settings.tie_gem_pouches)
+      Flags.reset('loot-pouch-full')
     end
 
     if (@settings.fill_pouch_with_box || @settings.loot_specials.empty?)
