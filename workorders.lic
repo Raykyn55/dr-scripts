@@ -144,7 +144,7 @@ class WorkOrder
     item = DRCC.recipe_lookup(get_data('recipes')[discipline], recipe_name) # populates recipe data from base-recipes for a given item selected above
     echo "Recipe information for #{recipe_name}: #{item}" + debug_line if @debug
 
-    quantity = (34 - DRSkill.getxp(WOD.rank_map[wod_disc])) / 10 # sets quantity based on current mindstate, max of 3 items.
+    quantity = (34 - DRSkill.getxp(WOD.rank_map[wod_disc])) / 8 # sets quantity based on current mindstate, max of 3 items.
 
     unless quantity > 0 # mindstate of 25 or greater ends the training prematurely
       DRC.message("Current mindstate in #{WOD.rank_map[wod_disc]} is #{DRSkill.getxp(WOD.rank_map[wod_disc])}, which is above training threshold of 24. Exiting")
@@ -380,7 +380,6 @@ class WorkOrder
   end
 
   def enchant_prep(info, materials_info, item, quantity, book, _script, _base)
-    quantity += 1 # To account for the poor training ratio (rt:mindstate) in enchanting.
     item['part'].each do |part|
       buy_material_singles(info, materials_info[part], quantity, part)
     end
