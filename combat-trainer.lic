@@ -3814,6 +3814,9 @@ class AttackProcess
       # we'll wait another 15 seconds and retry.
       game_state.cooldown_timers[action] += 15
       return false
+    when /You must free up your left hand first/
+      $twohanded_skills << game_state.weapon_skill
+      return false
     when *maneuver_failure_messages
       return false
     when *maneuver_success_messages
