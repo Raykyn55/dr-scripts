@@ -469,6 +469,7 @@ class WorkOrder
       DRCC.clean_anvil?
       DRCI.dispose_trash(name, @settings.worn_trashcan, @settings.worn_trashcan_verb) if DRCI.in_hands?(name)
     when /enchanting/
+      DRCC.stow_crafting_item(DRC.left_hand, @bag, @belt)
       DRCC.clean_brazier?
       [DRC.left_hand, DRC.right_hand].each do |tool|
         DRCC.stow_crafting_item(tool, @bag, @belt) if @settings.enchanting_tools.include?(tool)
