@@ -1,56 +1,93 @@
 custom_require.call(%w[common common-travel common-items common-money])
 
-settings = get_settings
-totalL,totalK,totalD = [0,0,0]
-needed = []
-DRCI.stow_hands
+class BuyHerbs
+  def initialize
+    @settings = get_settings
+    @stacker = @settings.herb_stacker
+    DRCI.stow_hands
 
-def check_herb(herb)
+    check_stacker if @stacker
+    get_needed
+    go_haven if @haventrip.size > 0
+    go_crossing if @crossingtrip.size > 0
+    go_shard if @shardtrip.size > 0
+  end
+
+  def check_stacker
+    @current_stock = {}
+    unless DRCI.remove_item?(@stacker)
+      @stacker = false
+      return
+    end
+    fput "assess my #{@stacker}"
+    loop do
+      line = get
+      break if line =~ /The .* is about|There is nothing/
+      
+      if line =~ (/-\s+(?<doses>\d+) doses (?<herb>\w+ \w+)/)
+        @current_stock.store(Regexp.last_match[:herb], Regexp.last_match[:doses].to_i)
+      end
+    end
+    DRCI.wear_item?(@stacker)
+  end
+
+  def check_herb(herb)
     /You see nothing unusual/ =~ DRC.bput("look my #{herb}", /^You see nothing unusual/, /^I could not find what you were referring to/)
-end
+  end
 
-settings.herbs.each do |herb|
-    next if check_herb(herb['name'])
-    needed << herb['name']
-    if herb['location'] == 'Riverhaven'
-        totalL += herb['price']
-    elsif herb['location'] == 'Shard'
-        totalD += herb['price']
-    elsif herb['location'] == 'Crossing'
-        totalK += herb['price']
+  def get_needed
+    @needed = []
+    @totalL, @totalK, @totalD = [0, 0, 0]
+    @settings.herbs.each do |herb|
+      next if @stacker && @current_stock[herb['name']] > 6 || @current_stock[herb['name'] + 's'] > 6
+      next if !@stacker && check_herb(herb['name'])
+      @needed << herb['name']
+      if herb['location'] == 'Riverhaven'
+        @totalL += herb['price']
+      elsif herb['location'] == 'Shard'
+        @totalD += herb['price']
+      elsif herb['location'] == 'Crossing'
+        @totalK += herb['price']
+      end
     end
-end
 
-haventrip = settings.herbs.select { |herb| herb['location'] == 'Riverhaven' && needed.include?(herb['name'])}
-crossingtrip = settings.herbs.select { |herb| herb['location'] == 'Crossing' && needed.include?(herb['name']) }
-shardtrip = settings.herbs.select { |herb| herb['location'] == 'Shard' && needed.include?(herb['name']) }
+    @haventrip = @settings.herbs.select { |herb| herb['location'] == 'Riverhaven' && @needed.include?(herb['name'])}
+    @crossingtrip = @settings.herbs.select { |herb| herb['location'] == 'Crossing' && @needed.include?(herb['name']) }
+    @shardtrip = @settings.herbs.select { |herb| herb['location'] == 'Shard' && @needed.include?(herb['name']) }
+  end
 
-unless haventrip.empty?
-    echo('going to haven')
-    DRCM.ensure_copper_on_hand(totalL*2, settings, 'Riverhaven')
-    haventrip.each do |herb|
-        2.times do DRCT.buy_item(herb['room'], herb['name']) end
-        DRC.bput("combine #{herb['name'].split.last}", 'You combine', 'Those items cannot', 'too dense to be combined')
+  def go_haven
+    DRC.message("Going to Haven, picking up #{@haventrip.size} herbs")
+    DRCM.ensure_copper_on_hand(@totalL*2, @settings, 'Riverhaven')
+    @haventrip.each do |herb|
+      2.times do
+        DRCT.buy_item(herb['room'], herb['name'])
         DRCI.stow_hands
+      end
     end
+  end
+
+  def go_crossing
+    DRC.message("Going to Crossing, picking up #{@crossingtrip.size} herbs")
+    DRCM.ensure_copper_on_hand(@totalK*2, @settings, 'Crossing')
+    @crossingtrip.each do |herb|
+      2.times do
+        DRCT.buy_item(herb['room'], herb['name'])
+        DRCI.stow_hands
+      end
+    end
+  end
+
+  def go_shard
+    DRC.message("Going to Shard, picking up #{@shardtrip.size} herbs")
+    DRCM.ensure_copper_on_hand(@totalD*2, @settings, 'Shard')
+    @shardtrip.each do |herb|
+      2.times do
+        DRCT.buy_item(herb['room'], herb['name'])
+        DRCI.stow_hands
+      end
+    end
+  end
 end
 
-unless crossingtrip.empty?
-    echo('going to crossing')
-    DRCM.ensure_copper_on_hand(totalK*2, settings, 'Crossing')
-    crossingtrip.each do |herb|
-        2.times do DRCT.buy_item(herb['room'], herb['name']) end
-        DRC.bput("combine #{herb['name'].split.last}", 'You combine', 'Those items cannot', 'too dense to be combined')
-        DRCI.stow_hands
-    end
-end
-
-unless shardtrip.empty?
-    echo('going to shard')
-    DRCM.ensure_copper_on_hand(totalD*2, settings, 'Shard')
-    shardtrip.each do |herb|
-        2.times do DRCT.buy_item(herb['room'], herb['name']) end
-        DRC.bput("combine #{herb['name'].split.last}", 'You combine', 'Those items cannot', 'too dense to be combined')
-        DRCI.stow_hands
-    end
-end
+BuyHerbs.new
